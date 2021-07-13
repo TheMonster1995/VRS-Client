@@ -1,0 +1,17 @@
+export const GET_ORDERS = 'GET_ORDERS';
+export const GET_PARTS = 'GET_PARTS';
+export const UPDATE_PARTS = 'UPDATE_PARTS';
+export const NEW_ORDER = 'NEW_ORDER';
+export const UPDATE_ORDER = 'UPDATE_ORDER';
+export const DELETE_ORDER = 'DELETE_ORDER';
+export const SIGN_IN = 'SIGN_IN';
+export const SIGN_OUT = 'SIGN_OUT';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
+// export const TEST = 'TEST';
