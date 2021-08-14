@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Field, reduxForm } from 'redux-form';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import {
-  getOrders
+  getOrders,
+  logoutAction,
+  checkSignIn
 } from '../actions';
 import './header.css';
 
@@ -15,7 +18,27 @@ class Header extends Component {
   }
 
   componentDidMount() {
+    console.log('componentDidMount');
+    if (this.props.isSignedIn && this.props.location.pathname === '/login') return this.props.history.push('/');
+
+    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login') return this.props.history.push('/login');
+
+    if (this.props.isSignedIn === null) return this.props.checkSignIn();
+
+    if (!this.props.isSignedIn) return;
+
     if (!this.props.orders || this.props.orders.length === 0) this.props.getOrders();
+  }
+
+  componentDidUpdate() {
+    console.log('componentDidUpdate');
+    if (this.props.isSignedIn && this.props.location.pathname === '/login') return this.props.history.push('/');
+
+    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login') return this.props.history.push('/login');
+
+    if (this.props.isSignedIn === null) return this.props.checkSignIn();
+
+    if (!this.props.getCalled && this.props.isSignedIn) return this.props.getOrders();
   }
 
   renderInput = ({ input, placeholder }) => {
@@ -107,37 +130,41 @@ class Header extends Component {
     })
   }
 
-  signOut = () => {
-    console.log('sign out');
-  }
+  signOut = () => this.props.logoutAction();
+
+  renderHeaderContent = () => (
+    <>
+      <ul className="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 position-relative w-25">
+        <form onSubmit={this.props.handleSubmit(this.onSubmit)} className='w-100' autoComplete="off">
+          <Field
+            name="searchPhrase"
+            component={this.renderInput}
+            onChange={this.onChange}
+            onBlur={this.onBlur}
+            onFocus={this.onFocus}
+            placeholder="Search..."
+          />
+        </form>
+        {this.generateResultsDiv()}
+      </ul>
+
+      <div className="col-md-3 text-end">
+        <Link className="btn btn-outline-primary btn-sm" to="/dashboard">Dashboard</Link>
+      </div>
+    </>
+  )
 
   render() {
     return (
-      <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+      <header className="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
         <div className='d-flex col-md-3 mb-2 mb-md-0'>
-          <a href="/" className="d-flex align-items-center text-dark text-decoration-none">
+          <a href="/" className={`d-flex align-items-center text-dark text-decoration-none ${this.props.isSignedIn && 'd-sm-block d-none'}`}>
             LOGO
           </a>
-          <button className="btn btn-sm text-primary ms-3" onClick={this.signOut}>Sign out</button>
+          {this.props.isSignedIn && <button className="btn btn-sm text-primary ms-sm-3" onClick={this.signOut}>Sign out</button>}
         </div>
 
-        <ul className="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 position-relative w-25">
-          <form onSubmit={this.props.handleSubmit(this.onSubmit)} className='w-100' autoComplete="off">
-            <Field
-              name="searchPhrase"
-              component={this.renderInput}
-              onChange={this.onChange}
-              onBlur={this.onBlur}
-              onFocus={this.onFocus}
-              placeholder="Search..."
-            />
-          </form>
-          {this.generateResultsDiv()}
-        </ul>
-
-        <div className="col-md-3 text-end">
-          <Link className="btn btn-outline-primary" to="/dashboard">Dashboard</Link>
-        </div>
+        {this.props.isSignedIn && this.renderHeaderContent()}
       </header>
     );
   }
@@ -145,12 +172,16 @@ class Header extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    orders: state.orders.orders
+    orders: state.orders.orders,
+    isSignedIn: state.auth.isSignedIn,
+    getCalled: state.orders.getCalled
   };
 }
 
 export default reduxForm({
   form: 'streamForm'
 })(connect(mapStateToProps, {
-  getOrders
-})(Header));
+  getOrders,
+  logoutAction,
+  checkSignIn
+})(withRouter(Header)));

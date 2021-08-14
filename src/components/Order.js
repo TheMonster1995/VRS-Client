@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Order = ({ data }) => {
+const Order = ({ data, actions = false, toggleEdit, toggleDelete }) => {
   const generatePartRows = () => data.parts.map((row, i) => (
     <tr key={i}>
       <th scope="row">{i + 1}</th>
@@ -29,46 +30,75 @@ const Order = ({ data }) => {
 
     if (data.written_estimate_choice === 'none') results.push(`No written estimate requested`)
 
-    if (data.written_estimate_choice === 'full') results.push(`Full written estimate requested`)
+    if (data.written_estimate_choice === 'requested') results.push(`Written estimate requested. The final Bill may not Exceed this estimate without cusomer's written approval.`)
 
-    if (data.written_estimate_choice.split(',')[0] === 'limited') results.push(`Written estimate not required within a limit of $${data.written_estimate_choice.split(',')[1]}`)
+    if (data.written_estimate_choice === 'limited') results.push(`Written estimate not requested within a limit of $${data.written_estimate_limit}. The shop may not exeed this amount without customer's written or oral approval.`)
 
-    return results.map(term => <div className='card-text mt-3' key={data.id + '123'}><i className='bi bi-check2 me-2'></i>{term}</div>)
+    results.push(`Customer ${!data.return_replaced_parts ? 'does not' : ''} desire the return of any of the Parts that are replaced during the authorized repairs.`);
+    results.push(`Estimate is good for 30 days. This shop is not responsible for damage caused by theft, Fire, or acts of nature. I authorize the above repaires, along with any nececery materials. I autorize you and yor employees to operat my vehicle for the purpose of testing, and delivery at my risk. An express mechanic's lien is hereby acknowledge on the above vehicle to secure the amount of the repairs thereto. If I cancel repaires prior to thire completion for any reason, a tear-down and reassembly fee of $${data.cancel_fee || 0} will be applied.`)
+
+    return results.map((term, i) => <div className='card-text mt-2' key={i}><i className='bi bi-check2 me-2'></i>{term}</div>)
+  }
+
+  const renderActions = () => {
+    if (!actions) return null;
+
+    return (
+      <>
+        <button className='btn text-danger fs-4 p-0 mx-2' onClick={toggleDelete}><i className='bi bi-trash'></i></button>
+        <button className='btn text-success fs-4 p-0 mx-2' onClick={toggleEdit}><i className='bi bi-pencil-square'></i></button>
+        <button className='btn text-primary fs-4 p-0 mx-2'><i className='bi bi-folder-symlink'></i></button>
+      </>
+    )
   }
 
   return (
+    <Link to={`/order/${data.order_id}`} className='no-style-link'>
     <div className='card my-3'>
       <div className='card-header'>
-        #{data.id}
+        <div className='row'>
+          <div className='col pt-2'>
+            #{data.order_num}
+          </div>
+          <div className='col text-end'>
+            {renderActions()}
+          </div>
+        </div>
       </div>
       <div className='card-body'>
         <div className='card-title'>
           <div className='row'>
-            <div className='col'>
-              <i className="bi bi-person me-3"></i>{data.customer_info.name}
+            <div className='col-12 col-md-6'>
+              <div className='card-text mt-1'><i className="bi bi-person me-3"></i>{data.customer_info.name}</div>
+              <div className='card-text mt-1'><i className="bi bi-telephone me-3"></i>{data.customer_info.phone}</div>
             </div>
-            <div className='col'>
-              <div className='card-text mt-1'>Recieved at {data.received_date_time.toLocaleString()}</div>
-              <div className='card-text mt-1'>Promised {data.promised_date_time.toLocaleString()}</div>
+            <div className='col-12 col-md-6'>
+              <div className='card-text mt-1'>
+                <span className='me-3'>Recieved at</span>
+                {new Date(data.received_date_time).toLocaleDateString()}
+              </div>
+              <div className='card-text mt-1'>
+                <span className='me-3'>Promised</span>
+                {new Date(data.promised_date_time).toLocaleDateString()}
+              </div>
             </div>
           </div>
         </div>
         <div className='row'>
-          <div className='col border-end'>
+          <div className='col-12 col-md-6 border-end w-md-50'>
             <div className='card-text mt-1'><i className="bi bi-house me-3"></i>{data.customer_info.address}</div>
-            <div className='card-text mt-1'><i className="bi bi-telephone me-3"></i>{data.customer_info.phone}</div>
             <div className='card-text mt-3'>Second authorization</div>
             <div className='card-text mt-1'><i className="bi bi-person me-3"></i>{data.customer_info.second_auth.name}</div>
             <div className='card-text mt-1'><i className="bi bi-telephone me-3"></i>{data.customer_info.second_auth.phone}</div>
           </div>
-          <div className='col'>
+          <div className='col-12 col-md-6'>
             <div className='card-text mt-3'>Car info</div>
             <div className='row'>
               <div className='col border-end'>
                 <div className='card-text mt-1'>Year: {data.car_info.year}</div>
               </div>
               <div className='col'>
-                <div className='card-text mt-1'>Make: {data.car_info.year}</div>
+                <div className='card-text mt-1'>Make: {data.car_info.make}</div>
               </div>
             </div>
             <div className='row'>
@@ -106,25 +136,27 @@ const Order = ({ data }) => {
             {generatePartRows()}
           </tbody>
         </table>
-        <div className='card-title fw-bold mt-4'>Labore</div>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Description of service</th>
-              <th scope="col">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {generateLaboreRows()}
-          </tbody>
-        </table>
-        <hr className='my-4' />
         <div className='row'>
-          <div className='col-7'>
-            {generateTermStatements()}
+          <div className='col'>
+            <div className='card-title fw-bold'>Labore</div>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Description of service</th>
+                  <th scope="col">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {generateLaboreRows()}
+              </tbody>
+            </table>
+            <div className='terms'>
+              {generateTermStatements()}
+            </div>
           </div>
-          <div className='col-5'>
+          <div className='col'>
+            <div className='card-title fw-bold'>Total</div>
             <table className="table">
               <thead>
                 <tr>
@@ -146,8 +178,8 @@ const Order = ({ data }) => {
                 </tr>
                 <tr>
                   <th scope="row">3</th>
-                  <td>Gas, oil & greese</td>
-                  <td>{data.gas_oil_greece}</td>
+                  <td>Gas, oil & grease</td>
+                  <td>{data.gas_oil_grease}</td>
                 </tr>
                 <tr>
                   <th scope="row">4</th>
@@ -157,7 +189,7 @@ const Order = ({ data }) => {
                 <tr>
                   <th scope="row">5</th>
                   <td>Sublet repairs</td>
-                  <td>{data.subtle_repairs}</td>
+                  <td>{data.sublet_repairs}</td>
                 </tr>
                 <tr>
                   <th scope="row">6</th>
@@ -172,15 +204,18 @@ const Order = ({ data }) => {
                 <tr>
                   <th scope="row">8</th>
                   <th>Total</th>
-                  <th>{data.total}</th>
+                  <th>{data.total_fee}</th>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div className='card-text fw-bold'>Authorized by: {data.authorized_by}</div>
+        <hr className='my-4' />
+        <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {data.authorized_by}</div>
+        <div className='card-text fw-bold d-inline-block mx-3'>Date: {new Date(data.submission_date).toLocaleDateString()}</div>
       </div>
     </div>
+    </Link>
   )
 }
 

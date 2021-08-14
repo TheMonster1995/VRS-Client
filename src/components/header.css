@@ -1,5 +1,6 @@
 .results-parent {
   top: 2.4rem;
+  z-index: 9999999 !important;
 }
 
 .card:hover {

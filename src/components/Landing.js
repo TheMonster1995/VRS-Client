@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 // import { connect } from 'react-redux';
 import Orders from './Orders';
+import './css-general.css';
 
 class Landing extends Component {
+  state = {showForm: this.props.showForm || false}
+
+  toggleForm = () => this.setState({showForm: !this.state.showForm});
 
   render() {
-    // if (!this.props.orders) return <div>Loading...</div>;
-
-    // const { id } = this.props.orders.orders;
-
     return(
       <>
-        <Orders />
+        <div className='add-bar position-relative'>
+          {!this.state.showForm && <button className='btn btn-outline-secondary rounded-circle fs-3 l-40' onClick={this.toggleForm}><i className='bi bi-plus'></i></button>}
+        </div>
+        <Orders new={this.state.showForm} newToggle={this.toggleForm} />
       </>
     );
   }

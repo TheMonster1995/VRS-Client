@@ -1,9 +1,11 @@
 import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
 
-import Landing from './Landing';
-import Header from './Header';
 import history from '../history';
+import Header from './Header';
+import Landing from './Landing';
+import ShowOrder from './ShowOrder';
+import Login from './Login';
 
 const App = () => {
   return (
@@ -13,6 +15,8 @@ const App = () => {
           <Header />
           <Switch>
             <Route path="/" exact component={Landing} />
+            <Route path="/order/:id" exact component={ShowOrder} />
+            <Route path="/login" exact component={Login} />
           </Switch>
         </div>
       </Router>
