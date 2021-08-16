@@ -336,6 +336,7 @@ class OrderForm extends Component {
   }
 
   taxCal = (val, field) => {
+    let taxRate = parseFloat(this.props.tax_rate)
     let final = this.props.final;
 
     let parts = final.parts !== '' ? parseInt(final.parts) : 0;
@@ -348,7 +349,7 @@ class OrderForm extends Component {
     if (field && field === 'parts') parts = val;
     if (field && field === 'labore') labore = val;
 
-    let tax = ((parts + labore + gog + misc + sublet + storage) / 100) * 8.3;
+    let tax = ((parts + labore + gog + misc + sublet + storage) / 100) * taxRate;
     tax = Math.round(tax * 100) / 100;
 
     let total = parts + labore + gog + misc + sublet + storage + tax;
@@ -597,7 +598,7 @@ class OrderForm extends Component {
                         parentClass='w-10'
                         inputClass='p-1'
                         normalize={value => this.numberNormalizer(value)}
-                      /> required under California law.
+                      /> required under <span style={{textTransform: 'capitalize'}}>{this.props.state}</span> law.
                     </label>
                   </div>
                 </div>
@@ -740,7 +741,7 @@ class OrderForm extends Component {
               </div>
             </div>
             <hr className='my-4' />
-            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : 'Admin dude'}</div>
+            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : this.props.username}</div>
             <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
           <div className='card-footer text-end'>
@@ -793,7 +794,10 @@ const mapStateToProps = (state, ownProps) => {
     cp_rep: selector(state, 'cost_profit_representation') || false,
     law_charge: selector(state, 'law_charge') || false,
     part_return: selector(state, 'return_replaced_parts') || false,
-    orders: state.orders.orders
+    orders: state.orders.orders,
+    tax_rate: state.settings.settings.tax_rate,
+    state: state.settings.settings.state,
+    username: state.auth.username
   };
 }
 
