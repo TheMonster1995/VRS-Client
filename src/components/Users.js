@@ -97,8 +97,6 @@ class Users extends Component {
   toggleNew = () => this.setState({new: true});
 
   onSubmit = formValues => {
-    console.log('here');
-    console.log(formValues);
     let type = 'new';
 
     if (formValues.user_id && formValues.user_id !== '') type = 'update';
@@ -343,7 +341,7 @@ class Users extends Component {
             </tbody>
           </table>
         </form>
-        {!this.state.new && <button className='btn btn-link' type="button" onClick={this.toggleNew}>+ Add user</button>}
+        {(!this.state.new && this.props.userRole === 'admin') && <button className='btn btn-link' type="button" onClick={this.toggleNew}>+ Add user</button>}
         {this.state.delete && this.renderDeletePopup()}
       </div>
     )
