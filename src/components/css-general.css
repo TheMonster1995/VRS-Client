@@ -74,6 +74,12 @@
   }
 }
 
+@media (min-width: 786px) {
+  .w-md-t-50 {
+    width: 50% !important;
+  }
+}
+
 @media (min-width: 992px) and (max-width: 1200px) {
   .w-lg-30 {
     width: 30% !important;

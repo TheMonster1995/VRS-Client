@@ -7,7 +7,8 @@ import { withRouter } from 'react-router-dom';
 import {
   getOrders,
   logoutAction,
-  checkSignIn
+  checkSignIn,
+  getSettings
 } from '../actions';
 import './header.css';
 
@@ -41,6 +42,8 @@ class Header extends Component {
 
     if (!this.props.isSignedIn) return;
 
+    if (!this.props.settingsSet) this.props.getSettings();
+
     if (
       !this.props.orders ||
       this.props.orders.length === 0
@@ -69,10 +72,11 @@ class Header extends Component {
 
     if (this.props.isSignedIn === null) return this.props.checkSignIn();
 
-    if (
-      !this.props.getCalled &&
-      this.props.isSignedIn
-    ) return this.props.getOrders();
+    if (!this.props.isSignedIn) return;
+
+    if (!this.props.settingsSet) this.props.getSettings();
+
+    if (!this.props.getCalled) return this.props.getOrders();
   }
 
   renderInput = ({ input, placeholder }) => {
@@ -186,7 +190,7 @@ class Header extends Component {
       </ul>
 
       <div className="col-md-3 text-end">
-        <Link className="btn btn-outline-primary btn-sm" to="/dashboard">Dashboard</Link>
+        <Link className="btn btn-outline-primary btn-sm" to={this.props.location.pathname === "/dashboard" ? "/" : "/dashboard"}>{this.props.location.pathname === '/dashboard' ? 'Home' : 'Dashboard'}</Link>
       </div>
     </>
   )
@@ -195,9 +199,9 @@ class Header extends Component {
     return (
       <header className="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
         <div className='d-flex col-md-3 mb-2 mb-md-0'>
-          <a href="/" className={`d-flex align-items-center text-dark text-decoration-none ${this.props.isSignedIn && 'd-sm-block d-none'}`}>
+          <Link className={`text-dark text-decoration-none btn btn-link ${this.props.isSignedIn && 'd-sm-block d-none'}`} to='/'>
             LOGO
-          </a>
+          </Link>
           {this.props.isSignedIn && <button className="btn btn-sm text-primary ms-sm-3" onClick={this.signOut}>Sign out</button>}
         </div>
 
@@ -211,7 +215,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     orders: state.orders.orders,
     isSignedIn: state.auth.isSignedIn,
-    getCalled: state.orders.getCalled
+    getCalled: state.orders.getCalled,
+    settingsSet: state.settings.set
   };
 }
 
@@ -220,5 +225,6 @@ export default reduxForm({
 })(connect(mapStateToProps, {
   getOrders,
   logoutAction,
-  checkSignIn
+  checkSignIn,
+  getSettings
 })(withRouter(Header)));

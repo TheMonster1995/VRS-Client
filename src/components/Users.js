@@ -6,7 +6,8 @@ import * as _ from 'lodash';
 import {
   getUsers,
   saveUser,
-  deleteUser
+  deleteUser,
+  checkSignIn
 } from '../actions';
 
 class Users extends Component {
@@ -110,6 +111,7 @@ class Users extends Component {
       submitBlocked: true,
       usernameError: null
     })
+    this.props.checkSignIn()
   }
 
   onCancel = () => {
@@ -382,6 +384,7 @@ export default reduxForm({
     getUsers,
     saveUser,
     deleteUser,
+    checkSignIn,
     reset,
     initialize
   }

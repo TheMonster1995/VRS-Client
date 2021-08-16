@@ -10,6 +10,7 @@ import {
   NEW_USER,
   UPDATE_USER,
   DELETE_USER,
+  SET_SETTINGS
 } from './types';
 import repairShopApi from '../apis/repairShopApi';
 
@@ -68,7 +69,7 @@ export const checkSignIn = () => async (dispatch, getState) => {
 }
 
 export const getOrders = () => async (dispatch, getState) => {
-  const response = await repairShopApi.get('/orders', { headers: { accessToken: localStorage.getItem('accessToken') } });
+  const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
   // const response = {data: [
   //   {
   //       "received_date_time": "2021-08-06T19:30:00.000Z",
@@ -276,7 +277,7 @@ export const deleteOrder = id => async (dispatch, getState) => {
 }
 
 export const getUsers = () => async (dispatch, getState) => {
-  const response = await repairShopApi.get('/users', { headers: { accessToken: localStorage.getItem('accessToken') } });
+  const response = await repairShopApi.get('/users', { headers: { accesstoken: localStorage.getItem('accessToken') } });
   // const response = {data: [
   //   {
   //     user_id: '123',
@@ -308,7 +309,7 @@ export const saveUser = (data, t) => async (dispatch, getState) => {
     email: data.email,
     role: data.role || 'admin',
     status: data.status || 'active',
-    username: data.username
+    username: data.username.toLowerCase()
   }
 
   let response;
@@ -373,6 +374,44 @@ export const deleteUser = id => async (dispatch, getState) => {
   dispatch({
     type: DELETE_USER,
     payload: id
+  })
+}
+
+export const getSettings = () => async (dispatch, getState) => {
+  const response = await repairShopApi.get('/settings', { headers: { accesstoken: localStorage.getItem('accessToken') } })
+
+  dispatch({
+    type: SET_SETTINGS,
+    payload: {
+      settings: {
+        tax_rate: response.data.payload.tax_rate,
+        state: response.data.payload.state
+      },
+      shop: {
+        shop_name: response.data.payload.shop_name,
+        shop_address: response.data.payload.shop_address,
+        shop_phone: response.data.payload.shop_phone,
+      }
+    }
+  })
+}
+
+export const updateSettings = data => async (dispatch, getState) => {
+  await repairShopApi.put('/settings', { data }, { headers: { accesstoken: localStorage.getItem('accessToken') } });
+
+  dispatch({
+    type: SET_SETTINGS,
+    payload: {
+      settings: {
+        tax_rate: data.tax_rate,
+        state: data.state
+      },
+      shop: {
+        shop_name: data.shop_name,
+        shop_address: data.shop_address,
+        shop_phone: data.shop_phone,
+      }
+    }
   })
 }
 
