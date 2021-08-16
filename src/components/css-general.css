@@ -10,12 +10,28 @@
   margin-top: 10vh;
 }
 
-.w-90 {
-  width: 90% !important;
+.w-5 {
+  width: 5% !important;
 }
 
 .w-10 {
   width: 10% !important;
+}
+
+.w-15 {
+  width: 15% !important;
+}
+
+.w-17 {
+  width: 17% !important;
+}
+
+.w-85 {
+  width: 85% !important;
+}
+
+.w-90 {
+  width: 90% !important;
 }
 
 .terms .card-text {

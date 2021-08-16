@@ -7,6 +7,7 @@ import Landing from './Landing';
 import ShowOrder from './ShowOrder';
 import Login from './Login';
 import FPTempCmp from './FPTempCmp';
+import Dashboard from './Dashboard'
 
 const App = () => {
   return (
@@ -15,10 +16,11 @@ const App = () => {
         <div>
           <Header />
           <Switch>
-            <Route path="/" exact component={Landing} />
-            <Route path="/order/:id" exact component={ShowOrder} />
             <Route path="/login" exact component={Login} />
             <Route path="/forgotpassword/:token" exact component={FPTempCmp} />
+            <Route path="/" exact component={Landing} />
+            <Route path="/order/:id" exact component={ShowOrder} />
+            <Route path="/dashboard" exact component={Dashboard} />
           </Switch>
         </div>
       </Router>

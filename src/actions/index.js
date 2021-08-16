@@ -1,27 +1,26 @@
 import {
-  GET_ORDERS,
   GET_PARTS,
+  GET_ORDERS,
   NEW_ORDER,
   UPDATE_ORDER,
   DELETE_ORDER,
   SIGN_IN,
-  SIGN_OUT
+  SIGN_OUT,
+  GET_USERS,
+  NEW_USER,
+  UPDATE_USER,
+  DELETE_USER,
 } from './types';
 import repairShopApi from '../apis/repairShopApi';
 
-// export const normalAction = userId => {
-//   return {
-//     type: SIGN_IN,
-//     payload: userId
-//   }
-// }
-export const loginAction = (accessToken, role) => {
-  localStorage.setItem('accessToken', accessToken);
+export const loginAction = (token, role, username) => {
+  localStorage.setItem('accessToken', token);
   return {
     type: SIGN_IN,
     payload: {
-      token: accessToken,
-      role
+      token,
+      role,
+      username
     }
   }
 }
@@ -62,7 +61,8 @@ export const checkSignIn = () => async (dispatch, getState) => {
     type: SIGN_IN,
     payload: {
       token: accessToken,
-      role: tokenCheck.data.payload.role
+      role: tokenCheck.data.payload.role,
+      username: tokenCheck.data.payload.username
     }
   });
 }
@@ -271,6 +271,107 @@ export const deleteOrder = id => async (dispatch, getState) => {
 
   dispatch({
     type: DELETE_ORDER,
+    payload: id
+  })
+}
+
+export const getUsers = () => async (dispatch, getState) => {
+  const response = await repairShopApi.get('/users', { headers: { accessToken: localStorage.getItem('accessToken') } });
+  // const response = {data: [
+  //   {
+  //     user_id: '123',
+  //     name: 'some Name',
+  //     email: 'email@email.email',
+  //     role: 'user',
+  //     status: 'inactive',
+  //     username: 'someusername'
+  //   },
+  //   {
+  //     user_id: '1231',
+  //     name: 'some Name2',
+  //     email: 'email2@email.email',
+  //     role: 'admin',
+  //     status: 'active',
+  //     username: 'someusername2'
+  //   }
+  // ]};
+
+  dispatch({
+    type: GET_USERS,
+    payload: response.data.payload
+  })
+}
+
+export const saveUser = (data, t) => async (dispatch, getState) => {
+  let payload = {
+    name: data.name,
+    email: data.email,
+    role: data.role || 'admin',
+    status: data.status || 'active',
+    username: data.username
+  }
+
+  let response;
+
+  if (t === 'new') {
+    response = await repairShopApi.post(
+      '/user/new',
+      {
+        user: payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'accesstoken': localStorage.getItem('accessToken')
+        }
+      }
+    );
+  } else {
+    response = await repairShopApi.put(
+      '/user',
+      {
+        userid: data.user_id,
+        userdata: payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'accesstoken': localStorage.getItem('accessToken')
+        }
+      }
+    );
+  }
+
+  payload.user_id = response.data.payload.userId;
+
+  if (t === 'new') return dispatch({
+    type: NEW_USER,
+    payload
+  })
+
+  dispatch({
+    type: UPDATE_USER,
+    payload
+  })
+}
+
+export const deleteUser = id => async (dispatch, getState) => {
+  await repairShopApi.delete(
+    '/user',
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'accesstoken': localStorage.getItem('accessToken')
+      },
+      data: {
+        userid: id
+      }
+    }
+  );
+  // const response = true;
+
+  dispatch({
+    type: DELETE_USER,
     payload: id
   })
 }

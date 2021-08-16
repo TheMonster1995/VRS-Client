@@ -66,7 +66,7 @@ class Login extends Component {
       return this.setState({error: 'Bad username/password', loading: false})
     }
 
-    this.props.loginAction(check.data.payload.accessToken, check.data.payload.role);
+    this.props.loginAction(check.data.payload.accessToken, check.data.payload.role, check.data.payload.username);
     this.props.history.push('/')
   }
 
@@ -125,7 +125,7 @@ class Login extends Component {
       error: ''
     })
 
-    this.props.loginAction(savePassword.data.payload.accessToken, savePassword.data.payload.role);
+    this.props.loginAction(savePassword.data.payload.accessToken, savePassword.data.payload.role, savePassword.data.payload.username);
 
     setTimeout(() => {
       this.props.history.push('/')
