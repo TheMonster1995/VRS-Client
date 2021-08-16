@@ -18,10 +18,11 @@ class Header extends Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
-    if (this.props.isSignedIn && this.props.location.pathname === '/login') return this.props.history.push('/');
+    if (this.props.isSignedIn && (this.props.location.pathname === '/login' || this.props.location.pathname.indexOf('forgotpassword') !== -1)) return this.props.history.push('/');
 
-    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login') return this.props.history.push('/login');
+    if (this.props.isSignedIn === false && this.props.location.pathname.indexOf('forgotpassword') !== -1) return;
+
+    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login' && this.props.location.pathname.indexOf('forgotpassword') === -1) return this.props.history.push('/login');
 
     if (this.props.isSignedIn === null) return this.props.checkSignIn();
 
@@ -32,9 +33,11 @@ class Header extends Component {
 
   componentDidUpdate() {
     console.log('componentDidUpdate');
-    if (this.props.isSignedIn && this.props.location.pathname === '/login') return this.props.history.push('/');
+    if (this.props.isSignedIn && (this.props.location.pathname === '/login' || this.props.location.pathname.indexOf('forgotpassword') !== -1)) return this.props.history.push('/');
 
-    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login') return this.props.history.push('/login');
+    if (this.props.isSignedIn === false && this.props.location.pathname.indexOf('forgotpassword') !== -1) return;
+
+    if (this.props.isSignedIn === false && this.props.location.pathname !== '/login' && this.props.location.pathname.indexOf('forgotpassword') !== -1) return this.props.history.push('/login');
 
     if (this.props.isSignedIn === null) return this.props.checkSignIn();
 
@@ -130,7 +133,10 @@ class Header extends Component {
     })
   }
 
-  signOut = () => this.props.logoutAction();
+  signOut = () => {
+    this.props.logoutAction();
+    this.props.history.push('/login')
+  }
 
   renderHeaderContent = () => (
     <>
