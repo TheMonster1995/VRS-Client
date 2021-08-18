@@ -14,14 +14,15 @@ import {
 } from './types';
 import repairShopApi from '../apis/repairShopApi';
 
-export const loginAction = (token, role, username) => {
+export const loginAction = (token, role, username, name) => {
   localStorage.setItem('accessToken', token);
   return {
     type: SIGN_IN,
     payload: {
       token,
       role,
-      username
+      username,
+      name
     }
   }
 }
@@ -63,102 +64,103 @@ export const checkSignIn = () => async (dispatch, getState) => {
     payload: {
       token: accessToken,
       role: tokenCheck.data.payload.role,
-      username: tokenCheck.data.payload.username
+      username: tokenCheck.data.payload.username,
+      name: tokenCheck.data.payload.name
     }
   });
 }
 
 export const getOrders = () => async (dispatch, getState) => {
-  const response = {data: [
-    {
-        order_id: "123321432",
-        shopOrder: {parts: [], labore: []},
-        order: {"received_date_time": "2021-08-06T19:30:00.000Z",
-        "customer_info": {
-            "name": "فواد سلمانیان",
-            "address": "خیابان فردوسی، فرعی ۲۰ غربی، پلاک ۳۵",
-            "phone": "09361446386",
-            "second_auth": {
-                "name": "فواد سلمانیان",
-                "phone": "09361446386"
-            }
-        },
-        "car_info": {
-            "year": "1",
-            "make": "1",
-            "vin": "1",
-            "license": "1",
-            "odometer": "1",
-            "motor": "1"
-        },
-        "promised_date_time": "2021-08-06T19:30:00.000Z",
-        "parts": [
-            {
-                "qty": "1",
-                "num": "1",
-                "name": "1",
-                "price": "1",
-                "price_total": "1",
-                "warranty": false
-            },
-            {
-                "qty": "2",
-                "num": "2",
-                "name": "2",
-                "price": "2",
-                "price_total": "4",
-                "warranty": true
-            }
-        ],
-        "labore": [
-            {
-                "qty": "0",
-                "num": "",
-                "name": "1",
-                "price": "22",
-                "warranty": false
-            },
-            {
-                "qty": "0",
-                "num": "",
-                "name": "2",
-                "price": "333",
-                "warranty": false
-            }
-        ],
-        "gas_oil_greece": "1",
-        "misc_merch": "2",
-        "sublet_repairs": "3",
-        "storage_fee": "4",
-        "tax": 30.71,
-        "labore_only": 355,
-        "parts_fee": 5,
-        "cancel_fee": "33",
-        "written_estimate_choice": "limited",
-        "written_estimate_limit": "1",
-        "cost_profit_representation": true,
-        "law_charge_fee": "22",
-        "state": "california",
-        "total_fee": 400.71,
-        "law_charge": true,
-        "order_id": "123321432",
-        "submission_date": '8/7/2021',
-        "authorized_by": 'Admin dude',
-        "order_num": '7820211'}
-    }
-  ]};
-
-  dispatch({
-    type: GET_ORDERS,
-    payload: response.data
-  })
-
-  // const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
+  // const response = {data: [
+  //   {
+  //       order_id: "123321432",
+  //       shopOrder: {parts: [], labore: []},
+  //       order: {"received_date_time": "2021-08-06T19:30:00.000Z",
+  //       "customer_info": {
+  //           "name": "فواد سلمانیان",
+  //           "address": "خیابان فردوسی، فرعی ۲۰ غربی، پلاک ۳۵",
+  //           "phone": "09361446386",
+  //           "second_auth": {
+  //               "name": "فواد سلمانیان",
+  //               "phone": "09361446386"
+  //           }
+  //       },
+  //       "car_info": {
+  //           "year": "1",
+  //           "make": "1",
+  //           "vin": "1",
+  //           "license": "1",
+  //           "odometer": "1",
+  //           "motor": "1"
+  //       },
+  //       "promised_date_time": "2021-08-06T19:30:00.000Z",
+  //       "parts": [
+  //           {
+  //               "qty": "1",
+  //               "num": "1",
+  //               "name": "1",
+  //               "price": "1",
+  //               "price_total": "1",
+  //               "warranty": false
+  //           },
+  //           {
+  //               "qty": "2",
+  //               "num": "2",
+  //               "name": "2",
+  //               "price": "2",
+  //               "price_total": "4",
+  //               "warranty": true
+  //           }
+  //       ],
+  //       "labore": [
+  //           {
+  //               "qty": "0",
+  //               "num": "",
+  //               "name": "1",
+  //               "price": "22",
+  //               "warranty": false
+  //           },
+  //           {
+  //               "qty": "0",
+  //               "num": "",
+  //               "name": "2",
+  //               "price": "333",
+  //               "warranty": false
+  //           }
+  //       ],
+  //       "gas_oil_greece": "1",
+  //       "misc_merch": "2",
+  //       "sublet_repairs": "3",
+  //       "storage_fee": "4",
+  //       "tax": 30.71,
+  //       "labore_only": 355,
+  //       "parts_fee": 5,
+  //       "cancel_fee": "33",
+  //       "written_estimate_choice": "limited",
+  //       "written_estimate_limit": "1",
+  //       "cost_profit_representation": true,
+  //       "law_charge_fee": "22",
+  //       "state": "california",
+  //       "total_fee": 400.71,
+  //       "law_charge": true,
+  //       "order_id": "123321432",
+  //       "submission_date": '8/7/2021',
+  //       "authorized_by": 'Admin dude',
+  //       "order_num": '7820211'}
+  //   }
+  // ]};
   //
   // dispatch({
   //   type: GET_ORDERS,
-  //   payload: response.data.payload
+  //   payload: response.data
   // })
+
+  const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
+
+  dispatch({
+    type: GET_ORDERS,
+    payload: response.data.payload
+  })
 
   // history.push('/');
 }
@@ -364,7 +366,7 @@ export const getUsers = () => async (dispatch, getState) => {
   })
 }
 
-export const saveUser = (data, t) => async (dispatch, getState) => {
+export const saveUser = (data, t, same = false) => async (dispatch, getState) => {
   let payload = {
     name: data.name,
     email: data.email,
@@ -414,6 +416,16 @@ export const saveUser = (data, t) => async (dispatch, getState) => {
   dispatch({
     type: UPDATE_USER,
     payload
+  })
+
+  if (same) dispatch({
+    type: SIGN_IN,
+    payload: {
+      token: localStorage.getItem('accessToken'),
+      role: payload.role,
+      username: payload.username,
+      name: payload.name
+    }
   })
 }
 

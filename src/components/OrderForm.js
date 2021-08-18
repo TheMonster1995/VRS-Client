@@ -19,9 +19,17 @@ class OrderForm extends Component {
     if (!this.props.data) {
       const today = get0Date(new Date());
 
-      const counter = this.props.orders.filter(order => get0Date(new Date(order.submission_date)).toLocaleDateString() === today.toLocaleDateString()).length + 1;
+      let counter = this.props.orders.filter(order => get0Date(new Date(order.submission_date)).toLocaleDateString() === today.toLocaleDateString()).length + 1;
 
-      const orderNum = `${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}${counter}`;
+      let month = today.getMonth() + 1;
+      let day = today.getDate();
+
+      if (month.toString().length < 2) month = `0${month}`;
+      if (day.toString().length < 2) day = `0${day}`;
+      if (counter.toString().length === 1) counter = `00${counter}`;
+      if (counter.toString().length === 2) counter = `0${counter}`;
+
+      const orderNum = `${today.getFullYear()}${month}${day}${counter}`;
 
       return this.props.change('orderForm', 'order_num', orderNum)
     }
@@ -111,7 +119,7 @@ class OrderForm extends Component {
     )
   }
 
-  renderPartsTable = ({fields, meta }) => {
+  renderPartsTable = ({fields, meta, section}) => {
     if (fields.length < 2) fields.push();
 
     if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
@@ -125,7 +133,7 @@ class OrderForm extends Component {
               name={`${part}.qty`}
               component={this.renderInput}
               label={'QTY.'}
-              onBlur={this.partCal}
+              onBlur={this.partCal.bind(this, section)}
               normalize={value => numberNormalizer(value)}
             />
           </td>
@@ -148,7 +156,7 @@ class OrderForm extends Component {
               name={`${part}.price`}
               component={this.renderInput}
               label={'Part price'}
-              onBlur={this.partCal}
+              onBlur={this.partCal.bind(this, section)}
               normalize={value => numberNormalizer(value)}
             />
           </td>
@@ -176,7 +184,7 @@ class OrderForm extends Component {
     )
   )}
 
-  renderLaboreTable = ({fields, meta }) => {
+  renderLaboreTable = ({fields, meta, section}) => {
     if (fields.length < 2) fields.push();
 
     if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
@@ -197,7 +205,7 @@ class OrderForm extends Component {
               name={`${labore}.price`}
               component={this.renderInput}
               label={'Price'}
-              onBlur={this.laboreCal}
+              onBlur={this.laboreCal.bind(this, section)}
               normalize={value => numberNormalizer(value)}
             />
           </td>
@@ -267,8 +275,8 @@ class OrderForm extends Component {
     )
   }
 
-  laboreCal = () => {
-    let laboreAll = this.props.labore;
+  laboreCal = (section, e) => {
+    let laboreAll = section === 'customer' ? this.props.labore : this.props.laboreShop;
     let res = 0;
 
     if (!laboreAll || laboreAll.length === 0) return res;
@@ -278,12 +286,14 @@ class OrderForm extends Component {
       res += parseInt(item.price);
     });
 
-    this.props.change('orderForm', 'total_labore', numberNormalizer(res));
-    this.taxCal(res, 'labore');
+    let fieldName = section === 'customer' ? 'total_labore' : 'shop_total_labore';
+
+    this.props.change('orderForm', fieldName, numberNormalizer(res));
+    this.taxCal(section, res, 'labore');
   }
 
-  partsCal = e => {
-    let partsAll = this.props.parts;
+  partsCal = section => {
+    let partsAll = section === 'customer' ? this.props.parts : this.props.partsShop;
     let res = 0;
 
     if (!partsAll || partsAll.length === 0) return res;
@@ -293,24 +303,26 @@ class OrderForm extends Component {
       res += (parseInt(item.price || 0) * parseInt(item.qty || 1));
     });
 
-    this.props.change('orderForm', 'total_parts', numberNormalizer(res));
-    this.taxCal(res, 'parts');
+    let fieldName = section === 'customer' ? 'total_parts' : 'shop_total_parts';
+
+    this.props.change('orderForm', fieldName, numberNormalizer(res));
+    this.taxCal(section, res, 'parts');
   }
 
-  partCal = e => {
+  partCal = (section, e) => {
     let rowIndex = e.target.name.match(/[0-9]+/)[0];
-    let fieldName = e.target.name.match(/[a-zA-Z]+\[[0-9]+\]/)[0];
-    let field = this.props.parts[rowIndex] || {};
-    let qty = field.qty && field.qty !== '' ? parseInt(field.qty.toString().replace(/,/g, '')) : 1;
-    let price = field.price && field.price !== '' ? parseInt(field.price.toString().replace(/,/g, '')) : 0;
+    let fieldName = e.target.name.match(/([a-zA-Z]+_*)+\[[0-9]+\]/)[0];
+    let field = (section === 'customer' ? this.props.parts[rowIndex] : this.props.partsShop[rowIndex]) || {};
+    let qty = (field.qty && field.qty !== '') ? parseInt(field.qty.toString().replace(/,/g, '')) : 1;
+    let price = (field.price && field.price !== '') ? parseInt(field.price.toString().replace(/,/g, '')) : 0;
 
     this.props.change('orderForm', `${fieldName}.price_total`, numberNormalizer(qty * price));
-    this.partsCal();
+    this.partsCal(section);
   }
 
-  taxCal = (val, field) => {
+  taxCal = (section, val, field) => {
     let taxRate = parseFloat(this.props.tax_rate)
-    let final = this.props.final;
+    let final = section === 'customer' ? this.props.final : this.props.finalShop;
 
     let parts = final.parts !== '' ? parseInt(final.parts) : 0;
     let labore = final.labore !== '' ? parseInt(final.labore) : 0;
@@ -322,13 +334,19 @@ class OrderForm extends Component {
     if (field && field === 'parts') parts = val;
     if (field && field === 'labore') labore = val;
 
-    let tax = ((parts + labore + gog + misc + sublet + storage) / 100) * taxRate;
-    tax = Math.round(tax * 100) / 100;
+    let tax = 0;
+
+    if (section === 'customer') {
+      tax = ((parts + labore + gog + misc + sublet + storage) / 100) * taxRate;
+      tax = Math.round(tax * 100) / 100;
+    }
 
     let total = parts + labore + gog + misc + sublet + storage + tax;
 
-    this.props.change('orderForm', 'total_tax', numberNormalizer(tax));
-    this.props.change('orderForm', 'total', numberNormalizer(total));
+    let fieldName = section === 'customer' ? 'total' : 'shop_total';
+
+    if (section === 'customer') this.props.change('orderForm', `total_tax`, numberNormalizer(tax));
+    this.props.change('orderForm', fieldName, numberNormalizer(total));
   }
 
   onCancel = () => {
@@ -359,7 +377,7 @@ class OrderForm extends Component {
     // data.state = 'california';
     data.state = this.props.state;
     data.submission_date = this.props.data ? this.props.data.submission_date : new Date();
-    data.authorized_by = this.props.data ? this.props.data.authorized_by : this.props.username;
+    data.authorized_by = this.props.data ? this.props.data.authorized_by : this.props.name;
     // data.authorized_by = 'admin dude';
     // data.submission_date = new Date();
 
@@ -523,7 +541,7 @@ class OrderForm extends Component {
             <th scope="col">Warranty</th>
           </tr>
         </thead>
-        <FieldArray name='parts' component={this.renderPartsTable} />
+        <FieldArray name='parts' component={this.renderPartsTable} section="customer" />
       </table>
       <div className='row'>
         <div className='col'>
@@ -536,7 +554,7 @@ class OrderForm extends Component {
                 <th scope="col">Price $</th>
               </tr>
             </thead>
-            <FieldArray name='labore' component={this.renderLaboreTable} />
+            <FieldArray name='labore' component={this.renderLaboreTable} section="customer" />
           </table>
           <div className='card-title fw-bold'>Terms</div>
           <div className='card-text mt-2'>Written estimate choice (for > $500 bill)</div>
@@ -637,7 +655,7 @@ class OrderForm extends Component {
                     name="gas_oil_grease"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'customer')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -650,7 +668,7 @@ class OrderForm extends Component {
                     name="misc_merch"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'customer')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -663,7 +681,7 @@ class OrderForm extends Component {
                     name="sublet_repairs"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'customer')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -676,7 +694,7 @@ class OrderForm extends Component {
                     name="storage_fee"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'customer')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -729,7 +747,7 @@ class OrderForm extends Component {
             <th scope="col">Warranty</th>
           </tr>
         </thead>
-        <FieldArray name='shop_parts' component={this.renderPartsTable} />
+        <FieldArray name='shop_parts' component={this.renderPartsTable} section="shop" />
       </table>
       <div className='row'>
         <div className='col'>
@@ -742,7 +760,7 @@ class OrderForm extends Component {
                 <th scope="col">Price $</th>
               </tr>
             </thead>
-            <FieldArray name='shop_labore' component={this.renderLaboreTable} />
+            <FieldArray name='shop_labore' component={this.renderLaboreTable} section="shop" />
           </table>
         </div>
         <div className='col'>
@@ -788,7 +806,7 @@ class OrderForm extends Component {
                     name="shop_gas_oil_grease"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'shop')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -801,7 +819,7 @@ class OrderForm extends Component {
                     name="shop_misc_merch"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'shop')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -814,7 +832,7 @@ class OrderForm extends Component {
                     name="shop_sublet_repairs"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'shop')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -827,7 +845,7 @@ class OrderForm extends Component {
                     name="shop_storage_fee"
                     component={this.renderInput}
                     label="0"
-                    onBlur={this.taxCal}
+                    onBlur={this.taxCal.bind(this, 'shop')}
                     normalize={value => numberNormalizer(value)}
                   />
                 </td>
@@ -907,7 +925,7 @@ class OrderForm extends Component {
             {this.state.stage === 'first' && this.renderFirstStage()}
             {this.state.stage === 'second' && this.renderSecondStage()}
             <hr className='my-4' />
-            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : this.props.username}</div>
+            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : this.props.name}</div>
             <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
           <div className='card-footer row'>
@@ -966,6 +984,16 @@ const mapStateToProps = (state, ownProps) => {
       sublet: selector(state, 'sublet_repairs') || 0,
       storage: selector(state, 'storage_fee') || 0
     },
+    laboreShop: selector(state, 'shop_labore') || [],
+    partsShop: selector(state, 'shop_parts') || [],
+    finalShop: {
+      parts: selector(state, 'shop_total_parts') || 0,
+      labore: selector(state, 'shop_total_labore') || 0,
+      gog: selector(state, 'shop_gas_oil_grease') || 0,
+      misc: selector(state, 'shop_misc_merch') || 0,
+      sublet: selector(state, 'shop_sublet_repairs') || 0,
+      storage: selector(state, 'shop_storage_fee') || 0
+    },
     ws_choice: selector(state, 'written_estimate_choice') || 'none',
     cp_rep: selector(state, 'cost_profit_representation') || false,
     law_charge: selector(state, 'law_charge') || false,
@@ -973,7 +1001,7 @@ const mapStateToProps = (state, ownProps) => {
     orders: state.orders.orders,
     tax_rate: state.settings.settings.tax_rate,
     state: state.settings.settings.state,
-    username: state.auth.username
+    name: state.auth.name
   };
 }
 

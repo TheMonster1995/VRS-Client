@@ -320,7 +320,6 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           </Link>
         }
         {actions && renderHeader()}
-        <iframe>
         <div className='card-body'>
           {!viewRaw && renderNormalContent()}
           {viewRaw && renderRawContent()}
@@ -328,7 +327,6 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {data.order.authorized_by}</div>
           <div className='card-text fw-bold d-inline-block mx-3'>Date: {new Date(data.order.submission_date).toLocaleDateString()}</div>
         </div>
-        </iframe>
       </div>
     </>
   )

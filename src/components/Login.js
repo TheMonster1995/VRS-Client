@@ -63,10 +63,11 @@ class Login extends Component {
         }
       )
     } catch (err) {
-      return this.setState({error: 'Bad username/password', loading: false})
+      if (err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
+      return this.setState({error: 'Bad username/password', loading: false});
     }
 
-    this.props.loginAction(check.data.payload.accessToken, check.data.payload.role, check.data.payload.username);
+    this.props.loginAction(check.data.payload.accessToken, check.data.payload.role, check.data.payload.username, check.data.payload.name);
     this.props.history.push('/')
   }
 
@@ -84,6 +85,7 @@ class Login extends Component {
         }
       )
     } catch (err) {
+      if (err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
       return this.setState({error: `There was a problem sending the link. Try again or contact support`, loading: false})
     }
 
@@ -125,7 +127,7 @@ class Login extends Component {
       error: ''
     })
 
-    this.props.loginAction(savePassword.data.payload.accessToken, savePassword.data.payload.role, savePassword.data.payload.username);
+    this.props.loginAction(savePassword.data.payload.accessToken, savePassword.data.payload.role, savePassword.data.payload.username, savePassword.data.payload.name);
 
     setTimeout(() => {
       this.props.history.push('/')
@@ -176,8 +178,6 @@ class Login extends Component {
   }
 
   render() {
-    console.log('in render');
-    console.log(this.props);
     return (
       <section className='login-section container text-center'>
         <h2 className='fs-xs-4'><i className="bi bi-tools"></i> Vehicle Repairshop <i className="bi bi-tools"></i></h2>

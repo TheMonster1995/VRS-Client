@@ -15,7 +15,8 @@ export default (state = INITIAL_STATE, action) => {
         isSignedIn: true,
         authToken: action.payload.token,
         role: action.payload.role,
-        username: action.payload.username
+        username: action.payload.username,
+        name: action.payload.name
       }
 
     case SIGN_OUT:

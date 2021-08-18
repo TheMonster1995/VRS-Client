@@ -221,7 +221,7 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 export default reduxForm({
-  form: 'streamForm'
+  form: 'searchForm'
 })(connect(mapStateToProps, {
   getOrders,
   logoutAction,

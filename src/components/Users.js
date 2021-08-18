@@ -59,9 +59,9 @@ class Users extends Component {
 
   capitalize = str => `${str.charAt(0).toUpperCase()}${str.slice(1)}`
 
-  renderSelect = ({ input, options }) => {
+  renderSelect = ({ input, options, disabled = false }) => {
     return (
-      <select {...input} className="form-select">
+      <select {...input} className="form-select" disabled={disabled}>
         {options.map((option, i) => <option value={option} key={i}>{this.capitalize(option)}</option>)}
       </select>
     )
@@ -95,14 +95,19 @@ class Users extends Component {
     })
   }
 
-  toggleNew = () => this.setState({new: true});
+  toggleNew = () => {
+    this.props.initialize('userForm', {});
+    this.setState({new: true});
+  };
 
   onSubmit = formValues => {
     let type = 'new';
 
     if (formValues.user_id && formValues.user_id !== '') type = 'update';
 
-    this.props.saveUser(formValues, type);
+    let same = (type === 'update' && this.props.username === this.state.userInEdit.username) ? true : false;
+
+    this.props.saveUser(formValues, type, same);
     this.props.reset('userForm');
     this.setState({
       edit: false,
@@ -115,7 +120,6 @@ class Users extends Component {
   }
 
   onCancel = () => {
-    console.log('on cancel called');
     let newUsers = [...this.state.users];
     let userIndex = this.state.users.findIndex(user => user.username === this.state.userInEdit.username)
 
@@ -197,7 +201,7 @@ class Users extends Component {
           {(this.props.userRole === 'admin' || this.props.username === row.username) &&
             <>
               <button className='btn text-success fs-5 p-0 mx-2' onClick={this.toggleEdit.bind(this, row.user_id)} disabled={this.state.edit} type="button"><i className='bi bi-pencil-square'></i></button>
-              <button className='btn text-danger fs-5 p-0 mx-2' disabled={this.state.edit} type="button" onClick={this.toggleDelete.bind(this, row.user_id)}><i className='bi bi-trash'></i></button>
+              <button className='btn text-danger fs-5 p-0 mx-2' disabled={this.props.username === row.username ? true : this.state.edit} type="button" onClick={this.toggleDelete.bind(this, row.user_id)}><i className='bi bi-trash'></i></button>
             </>
           }
         </td>
@@ -246,6 +250,7 @@ class Users extends Component {
             component={this.renderSelect}
             options={['admin', 'user']}
             onChange={() => !this.state.usernameError && this.setState({submitBlocked: false})}
+            disabled={this.props.username === row.username ? true : false}
           />
         </td>
         <td className='w-17'>
@@ -254,6 +259,7 @@ class Users extends Component {
             component={this.renderSelect}
             options={['active', 'inactive']}
             onChange={() => !this.state.usernameError && this.setState({submitBlocked: false})}
+            disabled={this.props.username === row.username ? true : false}
           />
         </td>
         <td className='w-17'>

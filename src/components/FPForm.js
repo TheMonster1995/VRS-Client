@@ -25,7 +25,7 @@ class FPForm extends Component {
         />
         <div className='mb-2'>
           <button className='btn btn-primary' type="submit">Send link</button>
-          <button className='btn btn-link' onClick={this.props.fpTrigger}>Go back</button>
+          <button className='btn btn-link' type='button' onClick={this.props.fpTrigger}>Go back</button>
         </div>
       </form>
     )
