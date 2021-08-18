@@ -69,92 +69,102 @@ export const checkSignIn = () => async (dispatch, getState) => {
 }
 
 export const getOrders = () => async (dispatch, getState) => {
-  const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
-  // const response = {data: [
-  //   {
-  //       "received_date_time": "2021-08-06T19:30:00.000Z",
-  //       "customer_info": {
-  //           "name": "فواد سلمانیان",
-  //           "address": "خیابان فردوسی، فرعی ۲۰ غربی، پلاک ۳۵",
-  //           "phone": "09361446386",
-  //           "second_auth": {
-  //               "name": "فواد سلمانیان",
-  //               "phone": "09361446386"
-  //           }
-  //       },
-  //       "car_info": {
-  //           "year": "1",
-  //           "make": "1",
-  //           "vin": "1",
-  //           "license": "1",
-  //           "odometer": "1",
-  //           "motor": "1"
-  //       },
-  //       "promised_date_time": "2021-08-06T19:30:00.000Z",
-  //       "parts": [
-  //           {
-  //               "qty": "1",
-  //               "num": "1",
-  //               "name": "1",
-  //               "price": "1",
-  //               "warranty": false
-  //           },
-  //           {
-  //               "qty": "2",
-  //               "num": "2",
-  //               "name": "2",
-  //               "price": "2",
-  //               "warranty": true
-  //           }
-  //       ],
-  //       "labore": [
-  //           {
-  //               "qty": "0",
-  //               "num": "",
-  //               "name": "1",
-  //               "price": "22",
-  //               "warranty": false
-  //           },
-  //           {
-  //               "qty": "0",
-  //               "num": "",
-  //               "name": "2",
-  //               "price": "333",
-  //               "warranty": false
-  //           }
-  //       ],
-  //       "gas_oil_greece": "1",
-  //       "misc_merch": "2",
-  //       "sublet_repairs": "3",
-  //       "storage_fee": "4",
-  //       "tax": 30.71,
-  //       "labore_only": 355,
-  //       "parts_fee": 5,
-  //       "cancel_fee": "33",
-  //       "written_estimate_choice": "limited",
-  //       "written_estimate_limit": "1",
-  //       "cost_profit_representation": true,
-  //       "law_charge_fee": "22",
-  //       "state": "california",
-  //       "total": 400.71,
-  //       "law_charge": true,
-  //       "order_id": "123321432",
-  //       "submission_date": '8/7/2021',
-  //       "authorized_by": 'Admin dude',
-  //       "order_num": '7820211'
-  //   }
-  // ]};
+  const response = {data: [
+    {
+        order_id: "123321432",
+        shopOrder: {parts: [], labore: []},
+        order: {"received_date_time": "2021-08-06T19:30:00.000Z",
+        "customer_info": {
+            "name": "فواد سلمانیان",
+            "address": "خیابان فردوسی، فرعی ۲۰ غربی، پلاک ۳۵",
+            "phone": "09361446386",
+            "second_auth": {
+                "name": "فواد سلمانیان",
+                "phone": "09361446386"
+            }
+        },
+        "car_info": {
+            "year": "1",
+            "make": "1",
+            "vin": "1",
+            "license": "1",
+            "odometer": "1",
+            "motor": "1"
+        },
+        "promised_date_time": "2021-08-06T19:30:00.000Z",
+        "parts": [
+            {
+                "qty": "1",
+                "num": "1",
+                "name": "1",
+                "price": "1",
+                "price_total": "1",
+                "warranty": false
+            },
+            {
+                "qty": "2",
+                "num": "2",
+                "name": "2",
+                "price": "2",
+                "price_total": "4",
+                "warranty": true
+            }
+        ],
+        "labore": [
+            {
+                "qty": "0",
+                "num": "",
+                "name": "1",
+                "price": "22",
+                "warranty": false
+            },
+            {
+                "qty": "0",
+                "num": "",
+                "name": "2",
+                "price": "333",
+                "warranty": false
+            }
+        ],
+        "gas_oil_greece": "1",
+        "misc_merch": "2",
+        "sublet_repairs": "3",
+        "storage_fee": "4",
+        "tax": 30.71,
+        "labore_only": 355,
+        "parts_fee": 5,
+        "cancel_fee": "33",
+        "written_estimate_choice": "limited",
+        "written_estimate_limit": "1",
+        "cost_profit_representation": true,
+        "law_charge_fee": "22",
+        "state": "california",
+        "total_fee": 400.71,
+        "law_charge": true,
+        "order_id": "123321432",
+        "submission_date": '8/7/2021',
+        "authorized_by": 'Admin dude',
+        "order_num": '7820211'}
+    }
+  ]};
 
   dispatch({
     type: GET_ORDERS,
-    payload: response.data.payload
+    payload: response.data
   })
+
+  // const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
+  //
+  // dispatch({
+  //   type: GET_ORDERS,
+  //   payload: response.data.payload
+  // })
 
   // history.push('/');
 }
 
 export const saveOrder = (data, t) => async (dispatch, getState) => {
-  let payload = {
+  let order = {
     order_num: data.order_num,
     parts: [],
     labore: [],
@@ -177,40 +187,85 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
     },
     received_date_time: data.received_date_time,
     promised_date_time: data.promised_date_time,
-    gas_oil_grease: data.gas_oil_grease || '0',
-    misc_merch: data.misc_merch || '0',
-    sublet_repairs: data.sublet_repairs || '0',
-    storage_fee: data.storage_fee || '0',
-    labore_only: data.total_labore || '0',
-    parts_fee: data.total_parts || '0',
-    tax: data.total_tax || '0',
-    total_fee: data.total || '0',
-    cancel_fee: data.cancel_fee || '0',
+    gas_oil_grease: data.gas_oil_grease?.toString().replace(/,/g, '') || '0',
+    misc_merch: data.misc_merch?.toString().replace(/,/g, '') || '0',
+    sublet_repairs: data.sublet_repairs?.toString().replace(/,/g, '') || '0',
+    storage_fee: data.storage_fee?.toString().replace(/,/g, '') || '0',
+    labore_only: data.total_labore?.toString().replace(/,/g, '') || '0',
+    parts_fee: data.total_parts?.toString().replace(/,/g, '') || '0',
+    tax: data.total_tax?.toString().replace(/,/g, '') || '0',
+    total_fee: data.total?.toString().replace(/,/g, '') || '0',
+    cancel_fee: data.cancel_fee?.toString().replace(/,/g, '') || '0',
     written_estimate_choice: data.written_estimate_choice || 'none',
-    written_estimate_limit: data.written_estimate_limit || 0,
+    written_estimate_limit: data.written_estimate_limit?.toString().replace(/,/g, '') || '0',
     cost_profit_representation: data.cost_profit_representation || false,
-    law_charge_fee: data.law_charge_fee || '123',
+    law_charge_fee: data.law_charge_fee?.toString().replace(/,/g, '') || '0',
     law_charge: data.law_charge || false,
     state: data.state,
     authorized_by: data.authorized_by,
     submission_date: data.submission_date
   }
 
-  if (data.labore && data.labore.length > 0) payload.labore = data.labore.map(lbr => ({
-    qty: lbr.qty || '0',
-    num: lbr.num || '',
+  if (data.labore) order.labore = data.labore.map(lbr => ({
     name: lbr.name || '',
-    price: lbr.price || '0',
-    warranty: lbr.warranty || false
+    price: lbr.price?.toString().replace(/,/g, '') || '0'
   }))
 
-  if (data.parts && data.parts.length > 0) payload.parts = data.parts.map(part => ({
-    qty: part.qty || '0',
+  if (data.parts) order.parts = data.parts.map(part => ({
+    qty: part.qty?.toString().replace(/,/g, '') || '0',
     num: part.num || '',
     name: part.name || '',
-    price: part.price || '0',
+    price: part.price?.toString().replace(/,/g, '') || '0',
+    price_total: part.price_total?.toString().replace(/,/g, '') || '0',
     warranty: part.warranty || false
   }))
+
+  let shopOrder = {
+    order_num: data.order_num,
+    parts: [],
+    labore: [],
+    gas_oil_grease: data.shop_gas_iol_grease?.toString().replace(/,/g, '') || '0',
+  	misc_merch: data.shop_misc_merch?.toString().replace(/,/g, '') || '0',
+  	sublet_repairs: data.shop_sublet_repairs?.toString().replace(/,/g, '') || '0',
+  	storage_fee: data.shop_storage_fee?.toString().replace(/,/g, '') || '0',
+  	labore_only: data.shop_total_labore?.toString().replace(/,/g, '') || '0',
+  	parts_fee: data.shop_total_parts?.toString().replace(/,/g, '') || '0',
+  	total_fee: data.shop_total?.toString().replace(/,/g, '') || '0'
+  }
+
+  if (!data.shop_labore) shopOrder.labore = order.labore.map(lbr => ({...lbr, price: ''}));
+
+  if (data.shop_labore) shopOrder.labore = data.shop_labore.map(lbr => ({
+    name: lbr.name || '',
+    price: lbr.price?.toString().replace(/,/g, '') || '0'
+  }))
+
+  if (data.shop_labore && data.shop_labore.length < order.labore.length) {
+    order.labore.forEach(item => {
+      let laboreDes = item.name;
+      let shopLaboreIndex = data.shop_labore.findIndex(lbr => lbr.name === laboreDes);
+      if (shopLaboreIndex === -1) shopOrder.parts.push({...item, price: ''})
+    });
+  }
+
+  if (!data.shop_parts) shopOrder.parts = order.parts.map(part => ({...part, price: '', price_total: ''}));
+
+  if (data.shop_parts) shopOrder.parts = data.shop_parts.map(part => ({
+    qty: part.qty?.toString().replace(/,/g, '') || '0',
+    num: part.num || '',
+    name: part.name || '',
+    price: part.price?.toString().replace(/,/g, '') || '0',
+    price_total: part.price_total?.toString().replace(/,/g, '') || '0',
+    warranty: part.warranty || false
+  }))
+
+  if (data.shop_parts && data.shop_parts.length < order.parts.length) {
+    order.parts.forEach(item => {
+      let partName = item.name;
+      let shopPartIndex = data.shop_parts.findIndex(prt => prt.name === partName);
+      if (shopPartIndex === -1) shopOrder.parts.push({...item, price: '', price_total: ''})
+    });
+  }
 
   let response;
 
@@ -218,7 +273,8 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
     response = await repairShopApi.post(
       '/order/new',
       {
-        order: payload
+        order,
+        shopOrder
       },
       {
         headers: {
@@ -231,7 +287,8 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
     response = await repairShopApi.put(
       '/order',
       {
-        order: payload
+        order,
+        shopOrder
       },
       {
         headers: {
@@ -242,7 +299,11 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
     );
   }
 
-  payload.order_id = response.data.payload.orderId;
+  let payload = {
+    order_id: response.data.payload.orderId,
+    order,
+    shopOrder
+  }
 
   if (t === 'new') return dispatch({
     type: NEW_ORDER,

@@ -26,17 +26,11 @@ export default (state = INITIAL_STATE, action) => {
       }
 
     case UPDATE_ORDER:
-      console.log('update order reducer');
       newOrders = [...state.orders];
-      console.log(newOrders);
-      console.log(action.payload);
+
       let orderIndex = newOrders.findIndex(order => order.order_id === action.payload.order_id)
 
-      console.log(orderIndex);
-
       newOrders[orderIndex] = action.payload;
-
-      console.log(newOrders[orderIndex]);
 
       return {
         ...state,

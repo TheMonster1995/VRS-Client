@@ -26,5 +26,45 @@ module.exports = {
     if (!obj) return false;
 
     return obj != null;
+  },
+
+  numberNormalizer: val => {
+    if (!val) return 0;
+    let value = parseFloat(val.toString().replace(/,/g, '')).toString();
+
+    if (isNaN(value)) return 0;
+
+    if (parseFloat(value) < 0) return 0;
+
+    if (value.length <= 3) return value;
+
+    let numRegex = /[0-9]*/;
+    let res = '';
+    let i;
+    let tempRes;
+
+    if (value.indexOf('.') >= 0) {
+      res = value.slice(value.indexOf('.'), value.indexOf('.') + 3);
+      value = value.slice(0, value.indexOf('.'));
+    }
+
+    if (value.length <= 3) return `${value}${res}`;
+
+    if (value.length % 3 > 0) {
+      tempRes = value.slice(0, value.length % 3);
+      value = value.slice(value.length % 3);
+    } else {
+      tempRes = value.slice(0, 3);
+      value = value.slice(3);
+    }
+
+    let forCounter = parseInt(value.length / 3)
+
+    for (i = 0; i < forCounter; i++) {
+      tempRes = `${tempRes},${value.slice(0, 3)}`;
+      value = value.slice(3);
+    }
+
+    return `${tempRes}${res}`;
   }
 }

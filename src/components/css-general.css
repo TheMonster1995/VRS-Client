@@ -50,6 +50,16 @@
   min-width: 465px !important;
 }
 
+.card .card-body:hover, .card .card-footer:hover {
+  background: #fff !important;
+  cursor: auto !important;
+}
+
+.card.no-hover:hover {
+  background: inherit !important;
+  cursor: auto !important;
+}
+
 @media (max-width: 576px) {
   .fs-xs-4 {
     font-size: calc(1.275rem + .3vw)!important;

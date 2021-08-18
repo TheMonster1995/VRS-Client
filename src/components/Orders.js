@@ -6,7 +6,7 @@ import OrderForm from './OrderForm';
 import { saveOrder } from '../actions';
 
 class Orders extends Component {
-  generateOrders = () => this.props.orders.map(order => <Order data={order} key={order.order_id} />)
+  generateOrders = () => this.props.orders.map(order => <Order data={order} key={order.order_id} type="single" />)
 
   submitForm = data => this.props.saveOrder(data, 'new');
 
