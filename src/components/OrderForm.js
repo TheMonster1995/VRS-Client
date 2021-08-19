@@ -67,6 +67,15 @@ class OrderForm extends Component {
     this.props.initialize('orderForm', initData)
   }
 
+  checkPartNum = (e, val) => {
+    let numRegex = /^([0-9]+_*\-*\.*)+$/;
+
+    console.log('here');
+    console.log(numRegex.test(val));
+
+    if (!numRegex.test(val)) return e.preventDefault();
+  }
+
   renderError = ({ error, touched }) => (touched && error) && <small className="form-text text-danger d-block">{error}</small>;
 
   renderInput = ({ input, label, meta, parentClass, inputClass, type }) => {
@@ -120,9 +129,11 @@ class OrderForm extends Component {
   }
 
   renderPartsTable = ({fields, meta, section}) => {
-    if (fields.length < 2) fields.push();
+    if (section === 'customer') {
+      if (fields.length < 2) fields.push();
 
-    if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
+      if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
+    }
 
     return fields.map((part, i) => (
       <tbody key={i}>
@@ -134,7 +145,7 @@ class OrderForm extends Component {
               component={this.renderInput}
               label={'QTY.'}
               onBlur={this.partCal.bind(this, section)}
-              normalize={value => numberNormalizer(value)}
+              normalize={value => numberNormalizer(value, 1)}
             />
           </td>
           <td>
@@ -142,6 +153,7 @@ class OrderForm extends Component {
               name={`${part}.num`}
               component={this.renderInput}
               label={'Part no.'}
+              onChange={this.checkPartNum}
             />
           </td>
           <td>
@@ -185,9 +197,11 @@ class OrderForm extends Component {
   )}
 
   renderLaboreTable = ({fields, meta, section}) => {
-    if (fields.length < 2) fields.push();
+    if (section === 'customer') {
+      if (fields.length < 2) fields.push();
 
-    if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
+      if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
+    }
 
     return fields.map((labore, i) => (
       <tbody key={i}>
@@ -283,7 +297,7 @@ class OrderForm extends Component {
 
     laboreAll.forEach(item => {
       if (!item) return;
-      res += parseInt(item.price);
+      res += parseInt(item.price?.toString().replace(/,/g, '') || 0);
     });
 
     let fieldName = section === 'customer' ? 'total_labore' : 'shop_total_labore';
@@ -300,7 +314,7 @@ class OrderForm extends Component {
 
     partsAll.forEach(item => {
       if (!item) return;
-      res += (parseInt(item.price || 0) * parseInt(item.qty || 1));
+      res += (parseInt(item.price?.toString().replace(/,/g, '') || 0) * parseInt(item.qty?.toString().replace(/,/g, '') || 1));
     });
 
     let fieldName = section === 'customer' ? 'total_parts' : 'shop_total_parts';
@@ -324,12 +338,12 @@ class OrderForm extends Component {
     let taxRate = parseFloat(this.props.tax_rate)
     let final = section === 'customer' ? this.props.final : this.props.finalShop;
 
-    let parts = final.parts !== '' ? parseInt(final.parts) : 0;
-    let labore = final.labore !== '' ? parseInt(final.labore) : 0;
-    let gog = final.gog !== '' ? parseInt(final.gog) : 0;
-    let misc = final.misc !== '' ? parseInt(final.misc) : 0;
-    let sublet = final.sublet !== '' ? parseInt(final.sublet) : 0;
-    let storage = final.storage !== '' ? parseInt(final.storage) : 0;
+    let parts = parseInt(final.parts?.toString().replace(/,/g, '') || 0);
+    let labore = parseInt(final.labore?.toString().replace(/,/g, '') || 0);
+    let gog = parseInt(final.gog?.toString().replace(/,/g, '') || 0);
+    let misc = parseInt(final.misc?.toString().replace(/,/g, '') || 0);
+    let sublet = parseInt(final.sublet?.toString().replace(/,/g, '') || 0);
+    let storage = parseInt(final.storage?.toString().replace(/,/g, '') || 0);
 
     if (field && field === 'parts') parts = val;
     if (field && field === 'labore') labore = val;
@@ -355,8 +369,28 @@ class OrderForm extends Component {
   }
 
   onSubmit = formValues => {
-    let parts = formValues.parts.filter(part => part);
-    let labore = formValues.labore.filter(lbr => lbr);
+    let partKeys = ['name', 'qty'];
+    let parts = formValues.parts.filter(part => {
+      let res = false;
+      if (part) {
+        res = true;
+        partKeys.forEach(item => {
+          if (!part[item] || part[item].toString().trim() === '') res = false;
+        });
+      }
+
+      if (res) return part;
+    });
+    let labore = formValues.labore.filter(lbr => {
+      let res = false;
+      if (
+        lbr &&
+        lbr.name &&
+        lbr.name.toString().trim() !== ''
+      ) res = true;
+
+      if (res) return lbr;
+    });
 
     if (this.state.stage === 'first') {
       if (this.props.data) return this.setState({stage: 'second'});
@@ -928,7 +962,7 @@ class OrderForm extends Component {
             <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : this.props.name}</div>
             <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
-          <div className='card-footer row'>
+          <div className='card-footer row mx-0'>
             <div className='col text-start'>
               {this.state.stage === 'second' && <button className='btn btn-warning mx-2' type='button' onClick={this.toggleStage}>Back</button>}
             </div>

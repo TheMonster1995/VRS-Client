@@ -54,7 +54,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
       <>
         <button className='btn text-danger fs-4 p-0 mx-2' onClick={toggleDelete}><i className='bi bi-trash'></i></button>
         <button className='btn text-success fs-4 p-0 mx-2' onClick={toggleEdit}><i className='bi bi-pencil-square'></i></button>
-        <button className='btn text-primary fs-4 p-0 mx-2'><i className='bi bi-folder-symlink'></i></button>
+        <a href={`http://51.75.182.106:4050/share/${data.order_id}`} target="_blank"><button className='btn text-primary fs-4 p-0 mx-2'><i className='bi bi-folder-symlink'></i></button></a>
       </>
     )
   }

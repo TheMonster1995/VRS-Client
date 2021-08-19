@@ -28,13 +28,13 @@ module.exports = {
     return obj != null;
   },
 
-  numberNormalizer: val => {
-    if (!val) return 0;
+  numberNormalizer: (val, min = 0) => {
+    if (!val) return '';
     let value = parseFloat(val.toString().replace(/,/g, '')).toString();
 
-    if (isNaN(value)) return 0;
+    if (isNaN(value)) return '';
 
-    if (parseFloat(value) < 0) return 0;
+    if (parseFloat(value) < min) return min;
 
     if (value.length <= 3) return value;
 
