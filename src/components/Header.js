@@ -123,13 +123,6 @@ class Header extends Component {
                 <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
                 <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
               </div>
-              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
-                <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-calendar3"></i><span className='ms-3'>Costs</span></button>
-                <button className='btn fs-5 float-end pt-0' type='button'><i className='bi bi-plus'></i></button>
-              </div>
-              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'reports' && 'active'}`}>
-                <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-bar-chart-line"></i><span className='ms-3'>Reports</span></button>
-              </div>
               <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
                 <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
               </div>
@@ -151,13 +144,6 @@ class Header extends Component {
                 <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === '' && 'active'}`}>
                   <button className="btn py-1 px-2 d-flex fw-bold" type='button'onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
                   <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
-                </div>
-                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
-                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-calendar3"></i><span className='ms-3'>Costs</span></button>
-                  <button className='btn fs-5 float-end pt-0' type='button'><i className='bi bi-plus'></i></button>
-                </div>
-                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'reports' && 'active'}`}>
-                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-bar-chart-line"></i><span className='ms-3'>Reports</span></button>
                 </div>
                 <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
                   <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
