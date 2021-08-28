@@ -63,7 +63,7 @@ class Login extends Component {
         }
       )
     } catch (err) {
-      if (err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
+      if (err.response && err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
       return this.setState({error: 'Bad username/password', loading: false});
     }
 
@@ -85,7 +85,7 @@ class Login extends Component {
         }
       )
     } catch (err) {
-      if (err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
+      if (err.response && err.response.status.toString() === '401') return this.setState({error: 'User inactive', loading: false});
       return this.setState({error: `There was a problem sending the link. Try again or contact support`, loading: false})
     }
 
@@ -179,7 +179,7 @@ class Login extends Component {
 
   render() {
     return (
-      <section className='login-section container text-center'>
+      <section className='login-section container text-center mt-5'>
         <h2 className='fs-xs-4'><i className="bi bi-tools"></i> Vehicle Repairshop <i className="bi bi-tools"></i></h2>
         <div className='card mx-auto mt-5 w-xl-25 w-lg-30 w-md-40 w-sm-50'>
           <div className='card-body'>

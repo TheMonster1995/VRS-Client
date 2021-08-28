@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { ScaleLoader } from 'react-spinners';
 
 import Order from './Order';
 import OrderForm from './OrderForm';
@@ -25,8 +26,7 @@ class ShowOrder extends Component {
   toggleDelete = () => this.setState({delete: !this.state.delete});
 
   setOrder = () => {
-
-    if (!this.props.orders) return;
+    if (!this.props.orders || !this.props.getCalled) return;
     if (this.props.orderCount === 0) return this.setState({ exists: false });
 
     let order = this.props.orders.find(order => order.order_id.toString() === this.props.match.params.id.toString());
@@ -60,18 +60,28 @@ class ShowOrder extends Component {
     )
   }
 
-  render() {
-    if (!this.state.exists) return <div>Loading...</div>;
+  renderContent = () => {
+    if (this.state.exists === null) return <div className='w-100 text-center'><ScaleLoader loading={true} color='#4b93ff' height={35} width={4} radius={2} margin={2} /></div>;
 
-    if (!this.state.exists) return <div>404 - Not Found</div>
+    if (!this.state.exists) return <div className='w-100 text-center'>404 - Not Found</div>
 
     const order = this.props.orders.find(order => order.order_id.toString() === this.props.match.params.id.toString())
 
-    return(
-      <section className='show-order-main container w-xxl-50 position-relative'>
+    return (
+      <>
         {!this.state.edit && <Order data={order} actions={true} toggleEdit={this.toggleEdit} toggleDelete={this.toggleDelete} />}
         {this.state.edit && <OrderForm data={order} toggle={this.toggleEdit} onFormSubmit={this.submitForm} />}
         {this.state.delete && this.renderDeletePopup()}
+      </>
+    )
+  }
+
+  render() {
+
+
+    return(
+      <section className='show-order-main container position-relative'>
+        {this.renderContent()}
       </section>
     );
   }
@@ -86,7 +96,8 @@ class ShowOrder extends Component {
 const mapStateToProps = (state, ownProps) => {
   return {
     orders: state.orders.orders,
-    orderCount: state.orders.orderCount
+    orderCount: state.orders.orderCount,
+    getCalled: state.orders.getCalled
   };
 }
 

@@ -4,6 +4,7 @@ export const UPDATE_PARTS = 'UPDATE_PARTS';
 export const NEW_ORDER = 'NEW_ORDER';
 export const UPDATE_ORDER = 'UPDATE_ORDER';
 export const DELETE_ORDER = 'DELETE_ORDER';
+export const TOGGLE_ORDER_FORM = 'TOGGLE_ORDER_FORM';
 export const GET_USERS = 'GET_USERS';
 export const NEW_USER = 'NEW_USER';
 export const UPDATE_USER = 'UPDATE_USER';

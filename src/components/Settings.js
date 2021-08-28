@@ -1,19 +1,20 @@
 import react, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Field, reduxForm, reset, initialize } from 'redux-form';
+import { Field, reduxForm, reset, initialize, change } from 'redux-form';
 import { BeatLoader } from 'react-spinners';
 
 import EditPasswordForm from './EditPasswordForm';
 import repairShopApi from '../apis/repairShopApi';
 import {
-  encrypt
+  encrypt,
+  numberNormalizer
 } from '../helper';
 import {
   updateSettings
 } from '../actions';
 
 class Settings extends Component {
-  state={
+  state = {
     edit: false,
     changePassword: false,
     loading: false,
@@ -40,9 +41,6 @@ class Settings extends Component {
       shop_phone: this.props.shop.phone,
       shop_address: this.props.shop.address
     }
-
-    console.log('here');
-    console.log(formData);
 
     this.setState({edit: true});
     this.props.initialize('settingsForm', formData);
@@ -94,7 +92,27 @@ class Settings extends Component {
 
   cancelEditPassword = () => this.setState({changePassword: false});
 
-  taxRateNormalize = val => isNaN(parseFloat(val)) ? '' : parseFloat(val);
+  validatePhone = val => {
+    if (!val) return;
+
+    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+
+    if (phoneRegex.test(val)) return;
+
+    return 'Invalid phone number';
+  }
+
+  pretifyPhone = val => {
+    let cleaned = ('' + val).replace(/\D/g, '');
+
+    //Check if the input is of correct length
+    let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+
+    // if (match) this.props.change('settingsForm', 'shop_phone', `(${match[1]})${match[2]}-${match[3]}`);
+    if (match) return `(${match[1]})${match[2]}-${match[3]}`;
+
+    return val;
+  }
 
   renderEditForm = () => {
     return (
@@ -103,7 +121,7 @@ class Settings extends Component {
           <Field
             name='tax_rate'
             component={this.renderInput}
-            normalize={this.taxRateNormalize}
+            normalize={value => numberNormalizer(value)}
             label='Tax rate'
           />
           <Field
@@ -122,6 +140,8 @@ class Settings extends Component {
             name='shop_phone'
             component={this.renderInput}
             label='Shop phone'
+            validate={this.validatePhone}
+            normalize={this.pretifyPhone}
           />
           <Field
             name='shop_address'
@@ -142,17 +162,17 @@ class Settings extends Component {
       <div className='row'>
         <div className='col-12 col-md-6'>
           <p className='text-secondary'>Tax rate</p>
-          <p className='py-1 fw-bold'>{this.props.tax_rate}</p>
+          <p className='py-1 ps-4 fw-bold'>{this.props.tax_rate}</p>
           <p className='text-secondary'>State</p>
-          <p className='py-1 fw-bold'>{this.props.state}</p>
+          <p className='py-1 ps-4 fw-bold'>{this.props.state}</p>
         </div>
         <div className='col-12 col-md-6'>
           <p className='text-secondary'>Shop name</p>
-          <p className='py-1 fw-bold'>{this.props.shop.name}</p>
+          <p className='py-1 ps-4 fw-bold'>{this.props.shop.name}</p>
           <p className='text-secondary'>Shop phone</p>
-          <p className='py-1 fw-bold'>{this.props.shop.phone}</p>
+          <p className='py-1 ps-4 fw-bold'>{this.props.shop.phone}</p>
           <p className='text-secondary'>Shop address</p>
-          <p className='py-1 fw-bold'>{this.props.shop.address}</p>
+          <p className='py-1 ps-4 fw-bold'>{this.props.shop.address}</p>
         </div>
       </div>
     )
@@ -160,7 +180,7 @@ class Settings extends Component {
 
   render() {
     return (
-      <div className='ps-lg-4 pt-lg-0 pt-4 ps-2'>
+      <div className='container settings-main'>
         <h4>General settings{!this.state.edit && <button className='btn text-success fs-5 p-0 mx-2' onClick={this.toggleEdit} disabled={this.props.userRole === 'admin' ? this.state.changePassword : true} type="button"><i className='bi bi-pencil-square'></i></button>}</h4>
         {this.state.edit ? this.renderEditForm() : this.renderContent()}
         {(!this.state.changePassword && !this.state.edit && !this.state.loading) && <button type='button' className='btn btn-link' onClick={this.triggerEditPassword}>Change password</button>}

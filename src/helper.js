@@ -30,7 +30,7 @@ module.exports = {
 
   numberNormalizer: (val, min = 0) => {
     if (!val) return '';
-    let value = parseFloat(val.toString().replace(/,/g, '')).toString();
+    let value = `${parseFloat(val.toString().replace(/,/g, '')).toString()}${val.toString().slice(-1) === '.' ? '.' : ''}`;
 
     if (isNaN(value)) return '';
 

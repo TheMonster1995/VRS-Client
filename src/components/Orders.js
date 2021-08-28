@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { ScaleLoader } from 'react-spinners';
+
 import Order from './Order';
 import OrderForm from './OrderForm';
-
 import { saveOrder } from '../actions';
 
 class Orders extends Component {
@@ -10,14 +11,22 @@ class Orders extends Component {
 
   submitForm = data => this.props.saveOrder(data, 'new');
 
-  render() {
-    if (!this.props.orders) return <div>Loading...</div>;
+  renderContent = () => {
+    if (!this.props.getCalled) return <div className='text-center pt-5'><ScaleLoader loading={true} color='#84d758' height={35} width={4} radius={2} margin={2} /></div>;
 
-    return(
-      <section className='orders-main container w-xxl-50'>
+    return (
+      <>
         {this.props.new && <OrderForm toggle={this.props.newToggle} onFormSubmit={this.submitForm} />}
         {this.generateOrders()}
         {this.props.orders.length === 0 && <div className='text-center pt-4 fs-4'>No orders found</div>}
+      </>
+    )
+  }
+
+  render() {
+    return(
+      <section className='orders-main container'>
+        {this.renderContent()}
       </section>
     );
   }
@@ -25,7 +34,8 @@ class Orders extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    orders: state.orders.orders
+    orders: state.orders.orders,
+    getCalled: state.orders.getCalled
   };
 }
 

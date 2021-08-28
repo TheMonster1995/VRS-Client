@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { Field, reduxForm } from 'redux-form';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
@@ -8,14 +6,16 @@ import {
   getOrders,
   logoutAction,
   checkSignIn,
-  getSettings
+  getSettings,
+  toggleForm
 } from '../actions';
 import './header.css';
+import Search from './Search';
 
 class Header extends Component {
   state = {
-    results: [],
-    showResultContainer: false
+    sideExpanded: false,
+    menuOpen: false
   }
 
   componentDidMount() {
@@ -44,10 +44,7 @@ class Header extends Component {
 
     if (!this.props.settingsSet) this.props.getSettings();
 
-    if (
-      !this.props.orders ||
-      this.props.orders.length === 0
-    ) this.props.getOrders();
+    if (!this.props.getCalled) return this.props.getOrders();
   }
 
   componentDidUpdate() {
@@ -79,134 +76,109 @@ class Header extends Component {
     if (!this.props.getCalled) return this.props.getOrders();
   }
 
-  renderInput = ({ input, placeholder }) => {
-    return (
-      <div className="form-group">
-        <input {...input} className="form-control" placeholder={placeholder} />
-      </div>
-    );
-  }
-
-  onSubmit = formValues => {
-    this.props.onSubmit(formValues);
-  }
-
-  onChange = data => {
-    if (data.target.value.trim() === '') return this.setState({ showResultContainer: false, results: [] });
-
-    this.search(data.target.value);
-    return this.setState({ showResultContainer: true });
-  }
-
-  search = phrase => {
-    if (!this.props.orders || this.props.orders.length === 0) return this.setState({results: []});
-
-    let searchPhrase = phrase.trim();
-    let results = [];
-
-    if (searchPhrase[0] === '#') searchPhrase = searchPhrase.slice(1);
-
-    if (!isNaN(searchPhrase)) {
-      this.props.orders.forEach(order => {
-        if (order.order_num.toString().includes(searchPhrase)) results.push(order);
-      });
-    } else {
-      this.props.orders.forEach(order => {
-        if (order.customer_info.name.toLowerCase().includes(searchPhrase.toLowerCase())) results.push(order)
-      });
-    }
-
-    return this.setState({
-      results
-    });
-  }
-
-  generateResultsDiv = () => {
-    if (!this.state.showResultContainer) return;
-
-    return (
-      <div className='results-parent w-100 position-absolute bg-light rounded'>
-        {this.generateResults()}
-      </div>
-    )
-  }
-
-  generateResults = () => {
-    if (this.state.results.length === 0) {
-      return (
-        <div className='card m-1'>
-          <div className='card-body text-muted'>
-            No results found!
-          </div>
-        </div>
-      )
-    }
-
-    return this.state.results.map(result => {
-      let receivedDate = new Date(result.received_date_time);
-      receivedDate = receivedDate.toDateString().slice(4);
-      return (
-        <Link to={`/order/${result.id}`} key={result.id} className='no-style-link'>
-          <div className='card m-1'>
-            <div className='card-body'>
-              {result.customer_info.name} <span className='text-black-50 fw-bold'>#{result.order_num}</span>
-              <div>
-                <span className='text-muted'>Received {receivedDate}</span>
-              </div>
-            </div>
-          </div>
-        </Link>
-      )
-    })
-  }
-
-  onBlur = () => this.setState({showResultContainer: false});
-
-  onFocus = () => {
-    if (this.state.results.length > 0) this.setState({
-      showResultContainer: true
-    })
-  }
-
   signOut = () => {
     this.props.logoutAction();
     this.props.history.push('/login')
   }
 
-  renderHeaderContent = () => (
-    <>
-      <ul className="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0 position-relative w-25">
-        <form onSubmit={this.props.handleSubmit(this.onSubmit)} className='w-100' autoComplete="off">
-          <Field
-            name="searchPhrase"
-            component={this.renderInput}
-            onChange={this.onChange}
-            onBlur={this.onBlur}
-            onFocus={this.onFocus}
-            placeholder="Search..."
-          />
-        </form>
-        {this.generateResultsDiv()}
-      </ul>
+  toggleMenu = () => this.setState({menuOpen: !this.state.menuOpen})
 
-      <div className="col-md-3 text-end">
-        <Link className="btn btn-outline-primary btn-sm" to={this.props.location.pathname === "/dashboard" ? "/" : "/dashboard"}>{this.props.location.pathname === '/dashboard' ? 'Home' : 'Dashboard'}</Link>
-      </div>
-    </>
-  )
+  ordersReroute = () => {
+    if (this.props.location.pathname === '/') return;
+
+    this.props.history.push('/');
+  }
+
+  newOrderToggle = () => {
+    if (this.props.newOrderForm) return;
+
+    this.props.toggleForm();
+
+    if (this.props.location.pathname !== '/') this.props.history.push('/');
+
+    window.scrollTo(0, 0);
+  }
+
+  usersReroute = () => {
+    if (this.props.location.pathname === '/users') return;
+
+    this.props.history.push('/users');
+  }
+
+  settingsReroute = () => {
+    if (this.props.location.pathname === '/settings') return;
+
+    this.props.history.push('/settings');
+  }
 
   render() {
-    return (
-      <header className="d-flex flex-wrap align-items-center justify-content-between py-3 mb-4 border-bottom">
-        <div className='d-flex col-md-3 mb-2 mb-md-0'>
-          <Link className={`text-dark text-decoration-none btn btn-link ${this.props.isSignedIn && 'd-sm-block d-none'}`} to='/'>
-            LOGO
-          </Link>
-          {this.props.isSignedIn && <button className="btn btn-sm text-primary ms-sm-3" onClick={this.signOut}>Sign out</button>}
-        </div>
+    let currentPage = this.props.location?.pathname.replace('/', '') || '';
 
-        {this.props.isSignedIn && this.renderHeaderContent()}
-      </header>
+    return (
+      <>
+        <header className={`d-flex flex-wrap align-items-center justify-content-start py-3 mb-4 position-fixed w-100 ${!this.props.isSignedIn && 'd-none'}`}>
+          <div className='d-flex col-md-3 mb-2 mb-md-0 side-bar-parent' onMouseEnter={() => {this.setState({sideExpanded: true})}} onMouseLeave={() => {this.setState({sideExpanded: false})}}>
+            <div className={`side-bar-main position-fixed d-flex flex-column justify-content-start ${this.state.sideExpanded && 'expanded'}`}>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === '' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
+                <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-calendar3"></i><span className='ms-3'>Costs</span></button>
+                <button className='btn fs-5 float-end pt-0' type='button'><i className='bi bi-plus'></i></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'reports' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-bar-chart-line"></i><span className='ms-3'>Reports</span></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'settings' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.settingsReroute}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+              </div>
+              <div className='mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between'>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.signOut}><i className="bi bi-box-arrow-left"></i><span className='ms-3'>Sign out</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-end open-menu-div w-10">
+            {this.props.isSignedIn &&
+              <button className="btn btn-dark mx-3" type='button' onClick={this.toggleMenu}><i className="bi bi-list"></i></button>
+            }
+            <div className='menu-parent'>
+              <div className={`menu-main position-fixed d-flex flex-column justify-content-start ${this.state.menuOpen && 'open'}`}>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === '' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
+                  <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
+                </div>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-calendar3"></i><span className='ms-3'>Costs</span></button>
+                  <button className='btn fs-5 float-end pt-0' type='button'><i className='bi bi-plus'></i></button>
+                </div>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'reports' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'><i className="bi bi-bar-chart-line"></i><span className='ms-3'>Reports</span></button>
+                </div>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
+                </div>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'settings' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.settingsReroute}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+                </div>
+                <div className='mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between'>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.signOut}><i className="bi bi-box-arrow-left"></i><span className='ms-3'>Sign out</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {this.props.isSignedIn &&
+            <Search
+              orders={this.props.orders}
+            />
+          }
+        </header>
+      </>
     );
   }
 }
@@ -216,15 +188,20 @@ const mapStateToProps = (state, ownProps) => {
     orders: state.orders.orders,
     isSignedIn: state.auth.isSignedIn,
     getCalled: state.orders.getCalled,
-    settingsSet: state.settings.set
+    settingsSet: state.settings.set,
+    newOrderForm: state.orders.new
   };
 }
 
-export default reduxForm({
-  form: 'searchForm'
-})(connect(mapStateToProps, {
+export default connect(mapStateToProps, {
   getOrders,
   logoutAction,
   checkSignIn,
-  getSettings
-})(withRouter(Header)));
+  getSettings,
+  toggleForm
+})(withRouter(Header));
+
+// <Link className="btn btn-outline-primary btn-sm" to={this.props.location.pathname === "/dashboard" ? "/" : "/dashboard"}>{this.props.location.pathname === '/dashboard' ? 'Home' : 'Dashboard'}</Link>
+// <Link className={`text-dark text-decoration-none btn btn-link ${this.props.isSignedIn && 'd-sm-block d-none'}`} to='/'>
+//   LOGO
+// </Link>

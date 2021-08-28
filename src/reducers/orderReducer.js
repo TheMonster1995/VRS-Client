@@ -2,10 +2,11 @@ import {
   GET_ORDERS,
   NEW_ORDER,
   UPDATE_ORDER,
-  DELETE_ORDER
+  DELETE_ORDER,
+  TOGGLE_ORDER_FORM
 } from '../actions/types';
 
-const INITIAL_STATE = {orders: [], orderCount: 0, getCalled: false}
+const INITIAL_STATE = {orders: [], orderCount: 0, getCalled: false, new: false}
 
 export default (state = INITIAL_STATE, action) => {
   let newOrders;
@@ -44,6 +45,12 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         orders: newOrders
+      }
+
+    case TOGGLE_ORDER_FORM:
+      return {
+        ...state,
+        new: !state.new
       }
 
     default:

@@ -7,12 +7,12 @@ import Landing from './Landing';
 import ShowOrder from './ShowOrder';
 import Login from './Login';
 import FPTempCmp from './FPTempCmp';
-import Dashboard from './Dashboard';
-import ShareOrder from './ShareOrder';
+import Settings from './Settings';
+import Users from './Users';
 
 const App = () => {
   return (
-    <div className="p-3">
+    <div>
       <Router history={history}>
         <div>
           <Header />
@@ -21,8 +21,8 @@ const App = () => {
             <Route path="/forgotpassword/:token" exact component={FPTempCmp} />
             <Route path="/" exact component={Landing} />
             <Route path="/order/:id" exact component={ShowOrder} />
-            <Route path="/share/:id" exact component={ShareOrder} />
-            <Route path="/dashboard" exact component={Dashboard} />
+            <Route path="/settings" exact component={Settings} />
+            <Route path="/users" exact component={Users} />
           </Switch>
         </div>
       </Router>

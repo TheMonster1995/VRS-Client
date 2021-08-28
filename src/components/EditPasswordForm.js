@@ -26,7 +26,7 @@ class EditPasswordForm extends Component {
         <Field
           name='password'
           component={this.renderInput}
-          label='Password'
+          label='New password'
           parentClass='mb-3'
           type='password'
         />
@@ -38,8 +38,8 @@ class EditPasswordForm extends Component {
           type='password'
         />
         <div className='mb-2'>
-          <button className='btn btn-primary' type="submit">Save</button>
-          <button className='btn btn-link' onClick={this.onCancel}>Cancel</button>
+          <button className='btn btn-primary mx-2' type="submit">Save</button>
+          <button className='btn btn-outline-secondary mx-2' onClick={this.onCancel}>Cancel</button>
         </div>
       </form>
     )

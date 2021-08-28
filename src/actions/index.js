@@ -10,7 +10,8 @@ import {
   NEW_USER,
   UPDATE_USER,
   DELETE_USER,
-  SET_SETTINGS
+  SET_SETTINGS,
+  TOGGLE_ORDER_FORM
 } from './types';
 import repairShopApi from '../apis/repairShopApi';
 
@@ -68,6 +69,12 @@ export const checkSignIn = () => async (dispatch, getState) => {
       name: tokenCheck.data.payload.name
     }
   });
+}
+
+export const toggleForm = () => {
+  return {
+    type: TOGGLE_ORDER_FORM
+  }
 }
 
 export const getOrders = () => async (dispatch, getState) => {
@@ -276,7 +283,7 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
       '/order/new',
       {
         order,
-        shopOrder
+        shoporder: shopOrder
       },
       {
         headers: {
@@ -290,7 +297,7 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
       '/order',
       {
         order,
-        shopOrder
+        shoporder: shopOrder
       },
       {
         headers: {
@@ -320,14 +327,11 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
 
 export const deleteOrder = id => async (dispatch, getState) => {
   await repairShopApi.delete(
-    '/order',
+    `/order/${id}`,
     {
       headers: {
         'Content-Type': 'application/json',
         'accesstoken': localStorage.getItem('accessToken')
-      },
-      data: {
-        orderid: id
       }
     }
   );

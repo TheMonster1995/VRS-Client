@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useHistory } from "react-router-dom";
 
 import {
   numberNormalizer
@@ -7,6 +8,7 @@ import {
 
 const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
   const [viewRaw, setViewRaw] = useState(false);
+  const history = useHistory();
 
   const generatePartRows = rows => rows.map((row, i) => (
     <tr key={i}>
@@ -77,52 +79,52 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
       <div className='card-title'>
         <div className='row'>
           <div className='col-12 col-md-6'>
-            <div className='card-text mt-1'><i className="bi bi-person me-3"></i>{data.order.customer_info.name}</div>
-            <div className='card-text mt-1'><i className="bi bi-telephone me-3"></i>{data.order.customer_info.phone}</div>
+            <div className='card-text mt-1'><i className="bi bi-person me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.name}</span></div>
+            <div className='card-text mt-1'><i className="bi bi-telephone me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.phone}</span></div>
           </div>
           <div className='col-12 col-md-6'>
             <div className='card-text mt-1'>
-              <span className='me-3'>Recieved at</span>
-              {new Date(data.order.received_date_time).toLocaleDateString()}
+              <span className='me-3 text-muted'>Recieved at:</span>
+              <span className='fst-italic'>{new Date(data.order.received_date_time).toLocaleDateString()}</span>
             </div>
             <div className='card-text mt-1'>
-              <span className='me-3'>Promised</span>
-              {new Date(data.order.promised_date_time).toLocaleDateString()}
+              <span className='me-3 text-muted'>Promised:</span>
+              <span className='fst-italic'>{new Date(data.order.promised_date_time).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
       </div>
       <div className='row'>
         <div className='col-12 col-md-6 border-end w-md-50'>
-          <div className='card-text mt-1'><i className="bi bi-house me-3"></i>{data.order.customer_info.address}</div>
-          <div className='card-text mt-3'>Second authorization</div>
-          <div className='card-text mt-1'><i className="bi bi-person me-3"></i>{data.order.customer_info.second_auth.name}</div>
-          <div className='card-text mt-1'><i className="bi bi-telephone me-3"></i>{data.order.customer_info.second_auth.phone}</div>
+          <div className='card-text mt-1'><i className="bi bi-house me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.address}</span></div>
+          <div className='card-text mt-3 text-muted'>Second authorization</div>
+          <div className='card-text mt-1'><i className="bi bi-person me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.second_auth.name}</span></div>
+          <div className='card-text mt-1'><i className="bi bi-telephone me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.second_auth.phone}</span></div>
         </div>
         <div className='col-12 col-md-6'>
-          <div className='card-text mt-3'>Car info</div>
+          <div className='card-text mt-3 fw-bold'>Car info</div>
           <div className='row'>
             <div className='col border-end'>
-              <div className='card-text mt-1'>Year: {data.order.car_info.year}</div>
+              <div className='card-text mt-1'><span className='text-muted me-2'>Year:</span><span className='fst-italic'>{data.order.car_info.year}</span></div>
             </div>
             <div className='col'>
-              <div className='card-text mt-1'>Make: {data.order.car_info.make}</div>
+              <div className='card-text mt-1'><span className='text-muted me-2'>Make:</span><span className='fst-italic'>{data.order.car_info.make}</span></div>
             </div>
           </div>
           <div className='row'>
             <div className='col border-end'>
-              <div className='card-text mt-1'>Vin: #{data.order.car_info.vin}</div>
+              <div className='card-text mt-1'><span className='text-muted'>Vin: #</span><span className='fst-italic'>{data.order.car_info.vin}</span></div>
             </div>
             <div className='col'>
-              <div className='card-text mt-1'>License: {data.order.car_info.license}</div>
+              <div className='card-text mt-1'><span className='text-muted me-2'>License:</span><span className='fst-italic'>{data.order.car_info.license}</span></div>
             </div>
           </div>
           <div className='row'>
             <div className='col border-end'>
-              <div className='card-text mt-1'>Odometer: #{data.order.car_info.odometer}</div>
+              <div className='card-text mt-1'><span className='text-muted'>Odometer: #</span><span className='fst-italic'>{data.order.car_info.odometer}</span></div>
             </div>
             <div className='col'>
-              <div className='card-text mt-1'>motor: #{data.order.car_info.motor}</div>
+              <div className='card-text mt-1'><span className='text-muted'>motor: #</span><span className='fst-italic'>{data.order.car_info.motor}</span></div>
             </div>
           </div>
         </div>
@@ -312,7 +314,12 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
 
   return (
     <>
-      {actions && <button type='button' className='btn btn-link' onClick={() => setViewRaw(!viewRaw)}>Switch to {viewRaw ? 'normal view' : 'raw view'}<span className="ms-2"><i className='bi bi-arrow-left-right'></i></span></button>}
+      {actions &&
+        <div className='d-flex justify-content-between '>
+        <button type='button' className='btn btn-link' onClick={() => history.push('/')}><span className="me-2"><i className='bi bi-arrow-left'></i></span>Back to home</button>
+          <button type='button' className='btn btn-link' onClick={() => setViewRaw(!viewRaw)}>Switch to {viewRaw ? 'normal view' : 'raw view'}<span className="ms-2"><i className='bi bi-arrow-left-right'></i></span></button>
+        </div>
+      }
       <div className={`card my-3 ${actions && 'no-hover'}`}>
         {(!actions && !share) &&
           <Link to={`/order/${data.order_id}`} className='no-style-link'>

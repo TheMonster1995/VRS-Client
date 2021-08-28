@@ -328,7 +328,7 @@ class Users extends Component {
 
   render() {
     return (
-      <div className='ps-lg-4 pt-lg-0 pt-4 ps-2 position-relative'>
+      <div className='container users-main position-relative'>
         <h4>User management</h4>
         <form onSubmit={this.props.handleSubmit(this.onSubmit)}>
           <table className="table">

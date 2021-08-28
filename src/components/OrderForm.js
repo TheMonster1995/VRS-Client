@@ -19,7 +19,7 @@ class OrderForm extends Component {
     if (!this.props.data) {
       const today = get0Date(new Date());
 
-      let counter = this.props.orders.filter(order => get0Date(new Date(order.submission_date)).toLocaleDateString() === today.toLocaleDateString()).length + 1;
+      let counter = this.props.orders.filter(order => get0Date(new Date(order.order.submission_date)).toLocaleDateString() === today.toLocaleDateString()).length + 1;
 
       let month = today.getMonth() + 1;
       let day = today.getDate();
@@ -410,8 +410,8 @@ class OrderForm extends Component {
     data.shop_labore = data.shop_labore.filter(lbr => lbr);
     // data.state = 'california';
     data.state = this.props.state;
-    data.submission_date = this.props.data ? this.props.data.submission_date : new Date();
-    data.authorized_by = this.props.data ? this.props.data.authorized_by : this.props.name;
+    data.submission_date = this.props.data ? this.props.data.order.submission_date : new Date();
+    data.authorized_by = this.props.data ? this.props.data.order.authorized_by : this.props.name;
     // data.authorized_by = 'admin dude';
     // data.submission_date = new Date();
 
@@ -922,14 +922,14 @@ class OrderForm extends Component {
   renderActionButtons = () => {
     if (this.state.stage === 'second') return (
       <>
-        <button className='btn btn-secondary mx-2' type='button' onClick={this.onCancel}>Cancel</button>
+        <button className='btn btn-outline-secondary mx-2' type='button' onClick={this.onCancel}>Cancel</button>
         <button className='btn btn-success mx-2' type='submit'>Submit</button>
       </>
     )
 
     return (
       <>
-        <button className='btn btn-secondary mx-2' type='button' onClick={this.onCancel}>Cancel</button>
+        <button className='btn btn-outline-secondary mx-2' type='button' onClick={this.onCancel}>Cancel</button>
         <button className='btn btn-success mx-2' type='submit'>Next</button>
       </>
     )
@@ -937,7 +937,8 @@ class OrderForm extends Component {
 
   render () {
     return (
-      <form onSubmit={this.props.handleSubmit(this.onSubmit)} autoComplete="off" className='order-form'>
+      <form onSubmit={this.props.handleSubmit(this.onSubmit)} autoComplete="off" className='order-form position-relative'>
+        <div className={`new-order-title-box border rounded fw-bold ${this.props.data && 'd-none'}`}>New order</div>
         <div className='border rounded my-3'>
           <div className='card-header'>
             <div className='row'>
@@ -959,8 +960,8 @@ class OrderForm extends Component {
             {this.state.stage === 'first' && this.renderFirstStage()}
             {this.state.stage === 'second' && this.renderSecondStage()}
             <hr className='my-4' />
-            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.authorized_by : this.props.name}</div>
-            <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.order.authorized_by : this.props.name}</div>
+            <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.order.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
           </div>
           <div className='card-footer row mx-0'>
             <div className='col text-start'>
