@@ -18,7 +18,12 @@ class Orders extends Component {
       <>
         {this.props.new && <OrderForm toggle={this.props.newToggle} onFormSubmit={this.submitForm} />}
         {this.generateOrders()}
-        {this.props.orders.length === 0 && <div className='text-center pt-4 fs-4'>No orders found</div>}
+        {(this.props.orders.length === 0 && !this.props.new) &&
+          <div className='text-center pt-4 fs-4'>
+            <div>You haven't submitted any orders</div>
+            <button type='button' className='btn btn-link fs-4' onClick={this.props.newToggle}>Submit new order</button>
+          </div>
+        }
       </>
     )
   }
