@@ -6,6 +6,7 @@ import orderReducer from './orderReducer';
 import partReducer from './partReducer';
 import userReducer from './userReducer';
 import settingsReducer from './settingsReducer'
+import costsReducer from './costsReducer'
 
 export default combineReducers({
   orders: orderReducer,
@@ -13,5 +14,6 @@ export default combineReducers({
   auth: authReducer,
   form: formReducer,
   users: userReducer,
-  settings: settingsReducer
+  settings: settingsReducer,
+  costs: costsReducer
 })

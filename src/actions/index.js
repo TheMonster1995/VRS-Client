@@ -11,7 +11,11 @@ import {
   UPDATE_USER,
   DELETE_USER,
   SET_SETTINGS,
-  TOGGLE_ORDER_FORM
+  TOGGLE_ORDER_FORM,
+  GET_COSTS,
+  NEW_COSTS,
+  UPDATE_COSTS,
+  DELETE_COSTS
 } from './types';
 import repairShopApi from '../apis/repairShopApi';
 
@@ -78,98 +82,12 @@ export const toggleForm = () => {
 }
 
 export const getOrders = () => async (dispatch, getState) => {
-  // const response = {data: [
-  //   {
-  //       order_id: "123321432",
-  //       shopOrder: {parts: [], labore: []},
-  //       order: {"received_date_time": "2021-08-06T19:30:00.000Z",
-  //       "customer_info": {
-  //           "name": "فواد سلمانیان",
-  //           "address": "خیابان فردوسی، فرعی ۲۰ غربی، پلاک ۳۵",
-  //           "phone": "09361446386",
-  //           "second_auth": {
-  //               "name": "فواد سلمانیان",
-  //               "phone": "09361446386"
-  //           }
-  //       },
-  //       "car_info": {
-  //           "year": "1",
-  //           "make": "1",
-  //           "vin": "1",
-  //           "license": "1",
-  //           "odometer": "1",
-  //           "motor": "1"
-  //       },
-  //       "promised_date_time": "2021-08-06T19:30:00.000Z",
-  //       "parts": [
-  //           {
-  //               "qty": "1",
-  //               "num": "1",
-  //               "name": "1",
-  //               "price": "1",
-  //               "price_total": "1",
-  //               "warranty": false
-  //           },
-  //           {
-  //               "qty": "2",
-  //               "num": "2",
-  //               "name": "2",
-  //               "price": "2",
-  //               "price_total": "4",
-  //               "warranty": true
-  //           }
-  //       ],
-  //       "labore": [
-  //           {
-  //               "qty": "0",
-  //               "num": "",
-  //               "name": "1",
-  //               "price": "22",
-  //               "warranty": false
-  //           },
-  //           {
-  //               "qty": "0",
-  //               "num": "",
-  //               "name": "2",
-  //               "price": "333",
-  //               "warranty": false
-  //           }
-  //       ],
-  //       "gas_oil_greece": "1",
-  //       "misc_merch": "2",
-  //       "sublet_repairs": "3",
-  //       "storage_fee": "4",
-  //       "tax": 30.71,
-  //       "labore_only": 355,
-  //       "parts_fee": 5,
-  //       "cancel_fee": "33",
-  //       "written_estimate_choice": "limited",
-  //       "written_estimate_limit": "1",
-  //       "cost_profit_representation": true,
-  //       "law_charge_fee": "22",
-  //       "state": "california",
-  //       "total_fee": 400.71,
-  //       "law_charge": true,
-  //       "order_id": "123321432",
-  //       "submission_date": '8/7/2021',
-  //       "authorized_by": 'Admin dude',
-  //       "order_num": '7820211'}
-  //   }
-  // ]};
-  //
-  // dispatch({
-  //   type: GET_ORDERS,
-  //   payload: response.data
-  // })
-
   const response = await repairShopApi.get('/orders', { headers: { accesstoken: localStorage.getItem('accessToken') } });
 
   dispatch({
     type: GET_ORDERS,
     payload: response.data.payload
   })
-
-  // history.push('/');
 }
 
 export const saveOrder = (data, t) => async (dispatch, getState) => {
@@ -335,7 +253,6 @@ export const deleteOrder = id => async (dispatch, getState) => {
       }
     }
   );
-  // const response = true;
 
   dispatch({
     type: DELETE_ORDER,
@@ -345,24 +262,6 @@ export const deleteOrder = id => async (dispatch, getState) => {
 
 export const getUsers = () => async (dispatch, getState) => {
   const response = await repairShopApi.get('/users', { headers: { accesstoken: localStorage.getItem('accessToken') } });
-  // const response = {data: [
-  //   {
-  //     user_id: '123',
-  //     name: 'some Name',
-  //     email: 'email@email.email',
-  //     role: 'user',
-  //     status: 'inactive',
-  //     username: 'someusername'
-  //   },
-  //   {
-  //     user_id: '1231',
-  //     name: 'some Name2',
-  //     email: 'email2@email.email',
-  //     role: 'admin',
-  //     status: 'active',
-  //     username: 'someusername2'
-  //   }
-  // ]};
 
   dispatch({
     type: GET_USERS,
@@ -376,7 +275,8 @@ export const saveUser = (data, t, same = false) => async (dispatch, getState) =>
     email: data.email,
     role: data.role || 'admin',
     status: data.status || 'active',
-    username: data.username.toLowerCase()
+    username: data.username.toLowerCase(),
+    password: data.password
   }
 
   let response;
@@ -435,18 +335,14 @@ export const saveUser = (data, t, same = false) => async (dispatch, getState) =>
 
 export const deleteUser = id => async (dispatch, getState) => {
   await repairShopApi.delete(
-    '/user',
+    `/user/${id}`,
     {
       headers: {
         'Content-Type': 'application/json',
         'accesstoken': localStorage.getItem('accessToken')
-      },
-      data: {
-        userid: id
       }
     }
   );
-  // const response = true;
 
   dispatch({
     type: DELETE_USER,
@@ -489,6 +385,90 @@ export const updateSettings = data => async (dispatch, getState) => {
         shop_phone: data.shop_phone,
       }
     }
+  })
+}
+
+export const getCosts = () => async (dispatch, getState) => {
+  const response = await repairShopApi.get('/costs', { headers: { accesstoken: localStorage.getItem('accessToken')} });
+
+  dispatch({
+    type: GET_COSTS,
+    payload: response
+  })
+}
+
+export const saveCosts = (data, t) => async (dispatch, getState) => {
+  let payload = {
+    from: data.from,
+    to: data.to,
+    submission_date: new Date(),
+    costs: []
+  }
+
+  if (data.costs) payload.costs = data.costs.map(cost => ({
+    name: cost.name || '',
+    amount: cost.amount || '',
+    price: cost.price?.toString().replace(/,/g, '') || '0'
+  }))
+
+  let response;
+
+  if (t === 'new') {
+    response = await repairShopApi.post(
+      '/costs/new',
+      {
+        ...payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'accesstoken': localStorage.getItem('accessToken')
+        }
+      }
+    );
+  } else {
+    response = await repairShopApi.put(
+      '/costs',
+      {
+        costsid: data.costs_id,
+        costsdata: payload
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'accesstoken': localStorage.getItem('accessToken')
+        }
+      }
+    );
+  }
+
+  payload.costs_id = response.data.payload?.userId || data.costs_id;
+
+  if (t === 'new') return dispatch({
+    type: NEW_COSTS,
+    payload
+  })
+
+  return dispatch({
+    type: UPDATE_COSTS,
+    payload
+  })
+}
+
+export const deleteCosts = id => async (dispatch, getState) => {
+  await repairShopApi.delete(
+    `/costs/${id}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'accesstoken': localStorage.getItem('accessToken')
+      }
+    }
+  );
+
+  dispatch({
+    type: DELETE_COSTS,
+    payload: id
   })
 }
 

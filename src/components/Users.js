@@ -10,6 +10,11 @@ import {
   checkSignIn
 } from '../actions';
 
+import {
+  generatePassword,
+  encrypt
+} from '../helper';
+
 class Users extends Component {
   state = {
     users: [],
@@ -96,7 +101,7 @@ class Users extends Component {
   }
 
   toggleNew = () => {
-    this.props.initialize('userForm', {});
+    this.props.initialize('userForm', {password: generatePassword()});
     this.setState({new: true});
   };
 
@@ -107,7 +112,11 @@ class Users extends Component {
 
     let same = (type === 'update' && this.props.username === this.state.userInEdit.username) ? true : false;
 
-    this.props.saveUser(formValues, type, same);
+    let values = {...formValues};
+
+    if (type === 'new') values.password = encrypt(formValues.password);
+
+    this.props.saveUser(values, type, same);
     this.props.reset('userForm');
     this.setState({
       edit: false,
@@ -197,6 +206,7 @@ class Users extends Component {
         <td>{row.username}</td>
         <td>{row.role}</td>
         <td>{row.status}</td>
+        <td>********</td>
         <td>
           {(this.props.userRole === 'admin' || this.props.username === row.username) &&
             <>
@@ -263,6 +273,9 @@ class Users extends Component {
           />
         </td>
         <td className='w-17'>
+          ********
+        </td>
+        <td className='w-17'>
           <button className='btn text-success fs-4 p-0 mx-2' type='submit' disabled={this.state.submitBlocked}><i className='bi bi-check-circle'></i></button>
           <button className='btn text-danger fs-4 p-0 mx-2' onClick={this.onCancel} type="button"><i className='bi bi-x-circle'></i></button>
         </td>
@@ -319,6 +332,13 @@ class Users extends Component {
           />
         </td>
         <td className='w-17'>
+          <Field
+            name='password'
+            component={this.renderInput}
+            label='Password'
+          />
+        </td>
+        <td className='w-17'>
           <button className='btn text-success fs-4 p-0 mx-2' type='submit'><i className='bi bi-check-circle'></i></button>
           <button className='btn text-danger fs-4 p-0 mx-2' onClick={this.onNewCancel} type="button"><i className='bi bi-x-circle'></i></button>
         </td>
@@ -340,6 +360,7 @@ class Users extends Component {
                 <th scope="col">Username</th>
                 <th scope="col">Role</th>
                 <th scope="col">Status</th>
+                <th scope="col">Password</th>
                 <th scope="col">Actions</th>
               </tr>
             </thead>
@@ -377,6 +398,10 @@ const validate = formValues => {
   if (formValues.email && !mailRegex.test(formValues.email)) errors.email = 'Invalid email address'
 
   if (!formValues.username) errors.username = "Please enter a username";
+
+  if (!formValues.password) errors.password = "Please enter password";
+
+  if (formValues.password && formValues.password.trim().length < 8) errors.password = "Password must be 8 characters or more";
 
   return errors;
 }

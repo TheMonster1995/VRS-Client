@@ -14,7 +14,7 @@ export default (state = INITIAL_STATE, action) => {
     case GET_ORDERS:
       return {
         ...state,
-        orders: action.payload,
+        orders: [...action.payload.reverse()],
         orderCount: action.payload.length || 0,
         getCalled: true
       }
