@@ -10,6 +10,7 @@ import FPTempCmp from './FPTempCmp';
 import Settings from './Settings';
 import Users from './Users';
 import Costs from './Costs';
+import Reports from './Reports';
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
             <Route path="/settings" exact component={Settings} />
             <Route path="/users" exact component={Users} />
             <Route path="/costs" exact component={Costs} />
+            <Route path="/reports" exact component={Reports} />
           </Switch>
         </div>
       </Router>

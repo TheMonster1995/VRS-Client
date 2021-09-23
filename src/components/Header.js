@@ -83,10 +83,10 @@ class Header extends Component {
 
   toggleMenu = () => this.setState({menuOpen: !this.state.menuOpen})
 
-  ordersReroute = () => {
-    if (this.props.location.pathname === '/') return;
+  handleReroute = route => {
+    if (this.props.location.pathname === route) return;
 
-    this.props.history.push('/');
+    this.props.history.push(route)
   }
 
   newOrderToggle = () => {
@@ -99,18 +99,6 @@ class Header extends Component {
     window.scrollTo(0, 0);
   }
 
-  usersReroute = () => {
-    if (this.props.location.pathname === '/users') return;
-
-    this.props.history.push('/users');
-  }
-
-  settingsReroute = () => {
-    if (this.props.location.pathname === '/settings') return;
-
-    this.props.history.push('/settings');
-  }
-
   render() {
     let currentPage = this.props.location?.pathname.replace('/', '') || '';
 
@@ -120,14 +108,20 @@ class Header extends Component {
           <div className='d-flex col-md-3 mb-2 mb-md-0 side-bar-parent' onMouseEnter={() => {this.setState({sideExpanded: true})}} onMouseLeave={() => {this.setState({sideExpanded: false})}}>
             <div className={`side-bar-main position-fixed d-flex flex-column justify-content-start ${this.state.sideExpanded && 'expanded'}`}>
               <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === '' && 'active'}`}>
-                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/')}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
                 <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
               </div>
               <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
-                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/users')}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
               </div>
               <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'settings' && 'active'}`}>
-                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.settingsReroute}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/settings')}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/costs')}><i className="bi bi-calendar4-range"></i><span className='ms-3'>Costs</span></button>
+              </div>
+              <div className={`mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between ${currentPage === 'reports' && 'active'}`}>
+                <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/reports')}><i className="bi bi-bar-chart-line"></i><span className='ms-3'>Reports</span></button>
               </div>
               <div className='mx-3 my-2 rounded-pill side-bar-btn-parent d-flex justify-content-between'>
                 <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.signOut}><i className="bi bi-box-arrow-left"></i><span className='ms-3'>Sign out</span></button>
@@ -142,14 +136,17 @@ class Header extends Component {
             <div className='menu-parent'>
               <div className={`menu-main position-fixed d-flex flex-column justify-content-start ${this.state.menuOpen && 'open'}`}>
                 <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === '' && 'active'}`}>
-                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'onClick={this.ordersReroute}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button'onClick={this.handleReroute.bind(this, '/')}><i className="bi bi-file-text"></i><span className='ms-3'>Orders</span></button>
                   <button className='btn fs-5 float-end pt-0' type='button' onClick={this.newOrderToggle}><i className='bi bi-plus'></i></button>
                 </div>
                 <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'users' && 'active'}`}>
-                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.usersReroute}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/users')}><i className="bi bi-people"></i><span className='ms-3'>Users</span></button>
                 </div>
                 <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'settings' && 'active'}`}>
-                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.settingsReroute}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/settings')}><i className="bi bi-gear"></i><span className='ms-3'>Settings</span></button>
+                </div>
+                <div className={`mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between ${currentPage === 'costs' && 'active'}`}>
+                  <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.handleReroute.bind(this, '/costs')}><i className="bi bi-calendar4-range"></i><span className='ms-3'>Costs</span></button>
                 </div>
                 <div className='mx-3 my-2 rounded-pill menu-btn-parent d-flex justify-content-between'>
                   <button className="btn py-1 px-2 d-flex fw-bold" type='button' onClick={this.signOut}><i className="bi bi-box-arrow-left"></i><span className='ms-3'>Sign out</span></button>

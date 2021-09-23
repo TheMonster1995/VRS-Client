@@ -167,6 +167,10 @@ header {
   width: 90% !important;
 }
 
+.w-unset {
+  width: unset !important;
+}
+
 .terms .card-text {
   font-size: .9rem !important;
 }

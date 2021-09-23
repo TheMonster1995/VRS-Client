@@ -43,7 +43,6 @@ class ShowOrder extends Component {
   submitForm = data => this.props.saveOrder(data, 'update');
 
   deleteOrder = () => {
-    console.log('delete order called');
     this.props.deleteOrder(this.props.match.params.id);
     this.props.history.push('/');
   }

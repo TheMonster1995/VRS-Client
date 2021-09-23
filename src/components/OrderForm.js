@@ -41,8 +41,10 @@ class OrderForm extends Component {
       total_labore: this.props.data.order.labore_only,
       total_parts: this.props.data.order.parts_fee,
       total_tax: this.props.data.order.tax,
+      total: this.props.data.order.total_fee,
       shop_total_labore: this.props.data.shopOrder.labore_only,
-      shop_total_parts: this.props.data.shopOrder.parts_fee
+      shop_total_parts: this.props.data.shopOrder.parts_fee,
+      shop_total: this.props.data.shopOrder.total_fee
     };
     let customerKeys = Object.keys(this.props.data.order.customer_info);
     let carKeys = Object.keys(this.props.data.order.car_info);
@@ -69,9 +71,6 @@ class OrderForm extends Component {
 
   checkPartNum = (e, val) => {
     let numRegex = /^([0-9]+_*\-*\.*)+$/;
-
-    console.log('here');
-    console.log(numRegex.test(val));
 
     if (!numRegex.test(val)) return e.preventDefault();
   }
@@ -119,7 +118,6 @@ class OrderForm extends Component {
           selected={input.value || null}
           onChange={input.onChange}
           minDate={minDate}
-          disabledKeyboardNavigation
           placeholderText={label}
           className='form-control border-0 border-bottom rounded-0'
         />

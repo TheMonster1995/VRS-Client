@@ -26,17 +26,10 @@ export default (state = INITIAL_STATE, action) => {
       }
 
     case UPDATE_USER:
-      console.log('update user reducer');
       newUsers = [...state.users];
-      console.log(newUsers);
-      console.log(action.payload);
       let userIndex = newUsers.findIndex(user => user.user_id === action.payload.user_id)
 
-      console.log(userIndex);
-
       newUsers[userIndex] = action.payload;
-
-      console.log(newUsers[userIndex]);
 
       return {
         ...state,

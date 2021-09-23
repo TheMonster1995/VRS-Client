@@ -389,11 +389,50 @@ export const updateSettings = data => async (dispatch, getState) => {
 }
 
 export const getCosts = () => async (dispatch, getState) => {
-  const response = await repairShopApi.get('/costs', { headers: { accesstoken: localStorage.getItem('accessToken')} });
+  // const response = {data: [
+  //   {
+  //     from: 'Jun 16 2021',
+  //     to: 'Sep 16 2021',
+  //     costs_id: '112233',
+  //     submission_date: 'Thu Sep 16 2021 14:02:49 GMT+0430 (Iran Daylight Time)',
+  //     costs: [
+  //       {
+  //         name: 'Hi',
+  //         qty: '1',
+  //         price: '1234'
+  //       },
+  //       {
+  //         name: 'Hi 2',
+  //         qty: '2',
+  //         price: '123456'
+  //       }
+  //     ],
+  //     total: '123123'
+  //   },
+  //   {
+  //     from: 'Jun 16 2021',
+  //     to: 'Sep 16 2021',
+  //     costs_id: '1122334',
+  //     submission_date: 'Thu Sep 16 2021 14:02:49 GMT+0430 (Iran Daylight Time)',
+  //     costs: [
+  //       {
+  //         name: 'Hi',
+  //         qty: '1',
+  //         price: '1234'
+  //       }
+  //     ],
+  //     total: '123123'
+  //   }
+  // ]};
+  // dispatch({
+  //   type: GET_COSTS,
+  //   payload: response.data
+  // })
 
+  const response = await repairShopApi.get('/costs', { headers: { accesstoken: localStorage.getItem('accessToken')} });
   dispatch({
     type: GET_COSTS,
-    payload: response
+    payload: response.data.payload
   })
 }
 
@@ -402,12 +441,13 @@ export const saveCosts = (data, t) => async (dispatch, getState) => {
     from: data.from,
     to: data.to,
     submission_date: new Date(),
-    costs: []
+    costs: [],
+    total: data.total
   }
 
   if (data.costs) payload.costs = data.costs.map(cost => ({
     name: cost.name || '',
-    amount: cost.amount || '',
+    qty: cost.qty || '',
     price: cost.price?.toString().replace(/,/g, '') || '0'
   }))
 
@@ -456,7 +496,7 @@ export const saveCosts = (data, t) => async (dispatch, getState) => {
 }
 
 export const deleteCosts = id => async (dispatch, getState) => {
-  await repairShopApi.delete(
+  let testV = await repairShopApi.delete(
     `/costs/${id}`,
     {
       headers: {
