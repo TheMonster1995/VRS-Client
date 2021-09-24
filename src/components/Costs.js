@@ -158,7 +158,10 @@ class Costs extends Component {
 
   }
 
-  toggleNew = () => this.setState({new: true});
+  toggleNew = () => {
+    this.setState({new: true});
+    this.props.initialize('costsForm', {})
+  };
 
   onSubmit = formValues => {
     let type = 'new';
@@ -179,7 +182,7 @@ class Costs extends Component {
     let total = 0;
 
     costs.forEach(cost => {
-      if (cost.price && cost.price !== '' && !isNaN(cost.price)) total = total + cost.price;
+      if (cost.price && cost.price !== '' && !isNaN(cost.price)) total = total + parseFloat(cost.price);
     });
 
 
@@ -204,6 +207,7 @@ class Costs extends Component {
     let costsIndex = this.state.costs.findIndex(cost => cost.costs_id === this.state.costsInEdit)
 
     newCosts[costsIndex]['edit'] = false;
+    console.log('edit onCancel called');
     this.props.reset('costsForm');
     this.setState({
       costs: newCosts,
@@ -222,7 +226,7 @@ class Costs extends Component {
   renderDeletePopup = () => {
     return (
       <div className='position-absolute delete-popup-parent'>
-        <div className='p-3 bg-white rounded text-center w-50 mx-auto my-5'>
+        <div className='p-3 bg-white rounded text-center w-50 mx-auto my-5 delete-popup'>
           <p>Are you sure you want to delete this record?</p>
           <button className='btn btn-secondary mx-3' onClick={this.toggleDelete}>Cancel</button>
           <button className='btn btn-outline-danger mx-3' onClick={this.deleteCosts}>Delete</button>

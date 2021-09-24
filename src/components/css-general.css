@@ -183,6 +183,11 @@ header {
   height: 100%;
 }
 
+.delete-popup {
+  position: sticky;
+  top: 10rem;
+}
+
 #root {
   min-width: 465px !important;
 }

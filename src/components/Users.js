@@ -152,7 +152,7 @@ class Users extends Component {
   renderDeletePopup = () => {
     return (
       <div className='position-absolute delete-popup-parent'>
-        <div className='p-3 bg-white rounded text-center w-50 mx-auto my-5'>
+        <div className='p-3 bg-white rounded text-center w-50 mx-auto my-5 delete-popup'>
           <p>Are you sure you want to delete this user?</p>
           <button className='btn btn-secondary mx-3' onClick={this.toggleDelete}>Cancel</button>
           <button className='btn btn-outline-danger mx-3' onClick={this.deleteUser}>Delete</button>

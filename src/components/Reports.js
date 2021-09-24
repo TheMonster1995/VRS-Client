@@ -169,11 +169,11 @@ class Reports extends Component {
     });
 
     return {
-      ordersNum,
-      sale,
-      costs,
-      netWorth,
-      partsNum
+      ordersNum: numberNormalizer(ordersNum),
+      sale: numberNormalizer(sale),
+      costs: numberNormalizer(costs),
+      netWorth: numberNormalizer(netWorth),
+      partsNum: numberNormalizer(partsNum)
     }
   }
 
@@ -355,6 +355,10 @@ class Reports extends Component {
       let nwTemp = this.nwCal(fromDTemp, 'y');
       yearlyData.data.push([fromDTemp.getFullYear().toString(), nwTemp]);
     }
+
+    console.log('in generateChartsData');
+    console.log(monthlyData);
+    console.log(yearlyData);
 
     return [monthlyData, yearlyData];
   }

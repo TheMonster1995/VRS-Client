@@ -295,7 +295,7 @@ class OrderForm extends Component {
 
     laboreAll.forEach(item => {
       if (!item) return;
-      res += parseInt(item.price?.toString().replace(/,/g, '') || 0);
+      res += parseFloat(item.price?.toString().replace(/,/g, '') || 0);
     });
 
     let fieldName = section === 'customer' ? 'total_labore' : 'shop_total_labore';
@@ -312,7 +312,7 @@ class OrderForm extends Component {
 
     partsAll.forEach(item => {
       if (!item) return;
-      res += (parseInt(item.price?.toString().replace(/,/g, '') || 0) * parseInt(item.qty?.toString().replace(/,/g, '') || 1));
+      res += (parseFloat(item.price?.toString().replace(/,/g, '') || 0) * parseFloat(item.qty?.toString().replace(/,/g, '') || 1));
     });
 
     let fieldName = section === 'customer' ? 'total_parts' : 'shop_total_parts';
@@ -325,8 +325,8 @@ class OrderForm extends Component {
     let rowIndex = e.target.name.match(/[0-9]+/)[0];
     let fieldName = e.target.name.match(/([a-zA-Z]+_*)+\[[0-9]+\]/)[0];
     let field = (section === 'customer' ? this.props.parts[rowIndex] : this.props.partsShop[rowIndex]) || {};
-    let qty = (field.qty && field.qty !== '') ? parseInt(field.qty.toString().replace(/,/g, '')) : 1;
-    let price = (field.price && field.price !== '') ? parseInt(field.price.toString().replace(/,/g, '')) : 0;
+    let qty = (field.qty && field.qty !== '') ? parseFloat(field.qty.toString().replace(/,/g, '')) : 1;
+    let price = (field.price && field.price !== '') ? parseFloat(field.price.toString().replace(/,/g, '')) : 0;
 
     this.props.change('orderForm', `${fieldName}.price_total`, numberNormalizer(qty * price));
     this.partsCal(section);
@@ -336,12 +336,12 @@ class OrderForm extends Component {
     let taxRate = parseFloat(this.props.tax_rate)
     let final = section === 'customer' ? this.props.final : this.props.finalShop;
 
-    let parts = parseInt(final.parts?.toString().replace(/,/g, '') || 0);
-    let labore = parseInt(final.labore?.toString().replace(/,/g, '') || 0);
-    let gog = parseInt(final.gog?.toString().replace(/,/g, '') || 0);
-    let misc = parseInt(final.misc?.toString().replace(/,/g, '') || 0);
-    let sublet = parseInt(final.sublet?.toString().replace(/,/g, '') || 0);
-    let storage = parseInt(final.storage?.toString().replace(/,/g, '') || 0);
+    let parts = parseFloat(final.parts?.toString().replace(/,/g, '') || 0);
+    let labore = parseFloat(final.labore?.toString().replace(/,/g, '') || 0);
+    let gog = parseFloat(final.gog?.toString().replace(/,/g, '') || 0);
+    let misc = parseFloat(final.misc?.toString().replace(/,/g, '') || 0);
+    let sublet = parseFloat(final.sublet?.toString().replace(/,/g, '') || 0);
+    let storage = parseFloat(final.storage?.toString().replace(/,/g, '') || 0);
 
     if (field && field === 'parts') parts = val;
     if (field && field === 'labore') labore = val;
