@@ -69,12 +69,6 @@ class OrderForm extends Component {
     this.props.initialize('orderForm', initData)
   }
 
-  checkPartNum = (e, val) => {
-    let numRegex = /^([0-9]+_*\-*\.*)+$/;
-
-    if (!numRegex.test(val)) return e.preventDefault();
-  }
-
   renderError = ({ error, touched }) => (touched && error) && <small className="form-text text-danger d-block">{error}</small>;
 
   renderInput = ({ input, label, meta, parentClass, inputClass, type }) => {
@@ -101,10 +95,10 @@ class OrderForm extends Component {
     );
   }
 
-  renderTextField = ({ input, label, meta, parentClass, inputClass }) => {
+  renderTextField = ({ input, label, meta, parentClass, inputClass, rows }) => {
     return (
       <div className={`d-inline-block ${parentClass}`}>
-        <textarea {...input} className="form-control border-0 rounded-0 border-bottom" placeholder={label} rows="3"></textarea>
+        <textarea {...input} className="form-control border-0 rounded-0 border-bottom" placeholder={label} rows={rows || '3'}></textarea>
         {this.renderError(meta)}
       </div>
     );
@@ -151,7 +145,6 @@ class OrderForm extends Component {
               name={`${part}.num`}
               component={this.renderInput}
               label={'Part no.'}
-              onChange={this.checkPartNum}
             />
           </td>
           <td>
@@ -208,8 +201,10 @@ class OrderForm extends Component {
           <td>
             <Field
               name={`${labore}.name`}
-              component={this.renderInput}
+              component={this.renderTextField}
               label={'Description'}
+              rows={2}
+              parentClass="w-100"
             />
           </td>
           <td>
@@ -548,10 +543,10 @@ class OrderForm extends Component {
                 />
               </div>
               <div className='card-text mt-1 d-flex align-items-center'>
-                motor#<Field
-                  name="car_motor"
+                model<Field
+                  name="car_model"
                   component={this.renderInput}
-                  label="Motor"
+                  label="Model"
                   parentClass='ms-3'
                 />
               </div>

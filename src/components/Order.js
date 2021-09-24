@@ -79,8 +79,8 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
       <div className='card-title'>
         <div className='row'>
           <div className='col-12 col-md-6'>
-            <div className='card-text mt-1'><i className="bi bi-person me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.name}</span></div>
-            <div className='card-text mt-1'><i className="bi bi-telephone me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.phone}</span></div>
+            <div className='card-text mt-1'><i className="bi bi-person me-1 text-muted"></i><span className='text-muted me-3'>Customer: </span><span className='fst-italic'>{data.order.customer_info.name}</span></div>
+            <div className='card-text mt-1'><i className="bi bi-telephone me-1 text-muted"></i><span className='text-muted me-3'>Phone: </span><span className='fst-italic'>{data.order.customer_info.phone}</span></div>
           </div>
           <div className='col-12 col-md-6'>
             <div className='card-text mt-1'>
@@ -96,10 +96,10 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
       </div>
       <div className='row'>
         <div className='col-12 col-md-6 border-end w-md-50'>
-          <div className='card-text mt-1'><i className="bi bi-house me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.address}</span></div>
+          <div className='card-text mt-1'><i className="bi bi-house me-1 text-muted"></i><span className='text-muted me-3'>Address: </span><span className='fst-italic'>{data.order.customer_info.address}</span></div>
           <div className='card-text mt-3 text-muted'>Second authorization</div>
-          <div className='card-text mt-1'><i className="bi bi-person me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.second_auth.name}</span></div>
-          <div className='card-text mt-1'><i className="bi bi-telephone me-3 text-muted"></i><span className='fst-italic'>{data.order.customer_info.second_auth.phone}</span></div>
+          <div className='card-text mt-1'><i className="bi bi-person me-1 text-muted"></i><span className='text-muted me-3'>Name: </span><span className='fst-italic'>{data.order.customer_info.second_auth.name}</span></div>
+          <div className='card-text mt-1'><i className="bi bi-telephone me-1 text-muted"></i><span className='text-muted me-3'>Phone: </span><span className='fst-italic'>{data.order.customer_info.second_auth.phone}</span></div>
         </div>
         <div className='col-12 col-md-6'>
           <div className='card-text mt-3 fw-bold'>Car info</div>
@@ -124,7 +124,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
               <div className='card-text mt-1'><span className='text-muted'>Odometer: #</span><span className='fst-italic'>{data.order.car_info.odometer}</span></div>
             </div>
             <div className='col'>
-              <div className='card-text mt-1'><span className='text-muted'>motor: #</span><span className='fst-italic'>{data.order.car_info.motor}</span></div>
+              <div className='card-text mt-1'><span className='text-muted'>Model:</span><span className='fst-italic'>{data.order.car_info.model}</span></div>
             </div>
           </div>
         </div>

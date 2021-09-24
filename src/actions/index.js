@@ -110,7 +110,7 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
       vin: data.car_vin || '',
       license: data.car_license || '',
       odometer: data.car_odometer || '',
-      motor: data.car_motor || ''
+      model: data.car_model || ''
     },
     received_date_time: data.received_date_time,
     promised_date_time: data.promised_date_time,
