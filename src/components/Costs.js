@@ -182,9 +182,9 @@ class Costs extends Component {
     let total = 0;
 
     costs.forEach(cost => {
-      if (cost.price && cost.price !== '' && !isNaN(cost.price)) total = total + parseFloat(cost.price);
+      let priceTemp = cost.price?.replace(/,/g, '');
+      if (priceTemp && priceTemp !== '' && !isNaN(priceTemp)) total = total + parseFloat(priceTemp);
     });
-
 
     let values = {
       ...formValues,

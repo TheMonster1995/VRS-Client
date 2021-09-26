@@ -66,21 +66,30 @@ class Reports extends Component {
 
       cResult = costs.filter(cost => {
         startDate = new Date(cost.from);
+        endDate = new Date(cost.to);
 
         if (
-          startDate.getTime() >= fromDate.getTime() &&
-          startDate.getTime() <= toDate.getTime()
+          (
+            startDate.getTime() >= fromDate.getTime() &&
+            startDate.getTime() <= toDate.getTime()
+          ) ||
+          (
+            endDate.getTime() >= fromDate.getTime() &&
+            endDate.getTime() <= toDate.getTime()
+          )
         ) return true;
 
         return false;
       })
 
       cResult = cResult.map(cost => {
+        startDate = new Date(cost.from);
         endDate = new Date(cost.to);
 
-        if (endDate.getTime() <= toDate.getTime()) return cost;
-
-        startDate = new Date(cost.from);
+        if (
+          startDate.getTime() >= fromDate.getTime() &&
+          endDate.getTime() <= toDate.getTime()
+        ) return cost;
 
         monthCount = (endDate.getMonth() - startDate.getMonth()) + 1;
 
@@ -88,7 +97,7 @@ class Reports extends Component {
 
         return {
           ...cost,
-          average: numberNormalizer(average)
+          average
         }
       })
 
@@ -106,11 +115,28 @@ class Reports extends Component {
       })
 
       cResult = costs.filter(cost => {
-        startDate = new Date(cost.from);
+        endDate = new Date(cost.to);
 
-        if (startDate.getTime() >= fromDate.getTime()) return true;
+        if (endDate.getTime() >= fromDate.getTime()) return true;
 
         return false;
+      })
+
+      cResult = cResult.map(cost => {
+        startDate = new Date(cost.from);
+
+        if (startDate.getTime() >= fromDate.getTime()) return cost;
+
+        endDate = new Date(cost.to);
+
+        monthCount = (endDate.getMonth() - startDate.getMonth()) + 1;
+
+        average = parseFloat(cost.total) / monthCount;
+
+        return {
+          ...cost,
+          average
+        }
       })
 
       return this.setState({orders: oResult, costs: cResult, filterCalled: true, dateChanged: false})
@@ -127,11 +153,28 @@ class Reports extends Component {
       })
 
       cResult = costs.filter(cost => {
-        endDate = new Date(cost.to);
+        startDate = new Date(cost.from);
 
-        if (endDate.getTime() <= toDate.getTime()) return true;
+        if (startDate.getTime() <= toDate.getTime()) return true;
 
         return false;
+      })
+
+      cResult = cResult.map(cost => {
+        endDate = new Date(cost.to);
+
+        if (endDate.getTime() <= toDate.getTime()) return cost;
+
+        startDate = new Date(cost.from);
+
+        monthCount = (endDate.getMonth() - startDate.getMonth()) + 1;
+
+        average = parseFloat(cost.total) / monthCount;
+
+        return {
+          ...cost,
+          average
+        }
       })
 
       return this.setState({orders: oResult, costs: cResult, filterCalled: true, dateChanged: false})
@@ -172,7 +215,7 @@ class Reports extends Component {
       ordersNum: numberNormalizer(ordersNum),
       sale: numberNormalizer(sale),
       costs: numberNormalizer(costs),
-      netWorth: numberNormalizer(netWorth),
+      netWorth: numberNormalizer(netWorth, -Infinity),
       partsNum: numberNormalizer(partsNum)
     }
   }
@@ -355,10 +398,6 @@ class Reports extends Component {
       let nwTemp = this.nwCal(fromDTemp, 'y');
       yearlyData.data.push([fromDTemp.getFullYear().toString(), nwTemp]);
     }
-
-    console.log('in generateChartsData');
-    console.log(monthlyData);
-    console.log(yearlyData);
 
     return [monthlyData, yearlyData];
   }

@@ -451,7 +451,6 @@ class OrderForm extends Component {
                 component={this.renderDatePicker}
                 label="Received date"
                 parentClass='ms-2'
-                minDate={new Date()}
               />
             </div>
             <div className='card-text mt-1 d-flex align-items-center'>

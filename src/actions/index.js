@@ -482,7 +482,7 @@ export const saveCosts = (data, t) => async (dispatch, getState) => {
     );
   }
 
-  payload.costs_id = response.data.payload?.userId || data.costs_id;
+  payload.costs_id = response.data.payload?.costsId || data.costs_id;
 
   if (t === 'new') return dispatch({
     type: NEW_COSTS,
