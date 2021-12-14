@@ -1,0 +1,18 @@
+.results-parent {
+  top: 2.4rem;
+  z-index: 9999999 !important;
+}
+
+.results-parent .card:hover {
+  cursor: pointer;
+  background: #fbfdff;
+}
+
+.no-style-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.no-style-link:hover {
+  color: inherit;
+}
