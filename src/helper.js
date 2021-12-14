@@ -30,6 +30,7 @@ module.exports = {
 
   numberNormalizer: (val, min = 0) => {
     if (!val) return '';
+    if (parseFloat(val) === 0) return 0;
     let value = `${parseFloat(val.toString().replace(/,/g, '')).toString()}${val.toString().slice(-1) === '.' ? '.' : ''}`;
 
     if (isNaN(value)) return '';
@@ -40,6 +41,7 @@ module.exports = {
 
     let numRegex = /[0-9]*/;
     let res = '';
+    let negative = false;
     let i;
     let tempRes;
 
@@ -48,7 +50,12 @@ module.exports = {
       value = value.slice(0, value.indexOf('.'));
     }
 
-    if (value.length <= 3) return `${value}${res}`;
+    if (parseFloat(value) < 0) {
+      negative = true;
+      value = (parseFloat(value) * -1).toString();
+    }
+
+    if (value.length <= 3) return `${negative ? '-' : ''}${value}${res}`;
 
     if (value.length % 3 > 0) {
       tempRes = value.slice(0, value.length % 3);
@@ -65,7 +72,7 @@ module.exports = {
       value = value.slice(3);
     }
 
-    return `${tempRes}${res}`;
+    return `${negative ? '-' : ''}${tempRes}${res}`;
   },
 
   generatePassword: () => {

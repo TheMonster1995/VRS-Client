@@ -151,6 +151,7 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
     order_num: data.order_num,
     parts: [],
     labore: [],
+    material: [],
     gas_oil_grease: data.shop_gas_iol_grease?.toString().replace(/,/g, '') || '0',
   	misc_merch: data.shop_misc_merch?.toString().replace(/,/g, '') || '0',
   	sublet_repairs: data.shop_sublet_repairs?.toString().replace(/,/g, '') || '0',
@@ -193,6 +194,11 @@ export const saveOrder = (data, t) => async (dispatch, getState) => {
       if (shopPartIndex === -1) shopOrder.parts.push({...item, price: '', price_total: ''})
     });
   }
+
+  if (data.shop_material) shopOrder.material = data.shop_material.map(mtr => ({
+    name: mtr.name || '',
+    price: mtr.price?.toString().replace(/,/g, '') || '0'
+  }))
 
   let response;
 
@@ -352,18 +358,21 @@ export const deleteUser = id => async (dispatch, getState) => {
 
 export const getSettings = () => async (dispatch, getState) => {
   const response = await repairShopApi.get('/settings', { headers: { accesstoken: localStorage.getItem('accessToken') } })
+  console.log('here');
+  console.log(response.data.payload);
 
   dispatch({
     type: SET_SETTINGS,
     payload: {
       settings: {
+        tax_label: response.data.payload.tax_label,
         tax_rate: response.data.payload.tax_rate,
         state: response.data.payload.state
       },
       shop: {
         shop_name: response.data.payload.shop_name,
         shop_address: response.data.payload.shop_address,
-        shop_phone: response.data.payload.shop_phone,
+        shop_phones: response.data.payload.shop_phones,
       }
     }
   })
@@ -376,13 +385,14 @@ export const updateSettings = data => async (dispatch, getState) => {
     type: SET_SETTINGS,
     payload: {
       settings: {
+        tax_label: data.tax_label,
         tax_rate: data.tax_rate,
         state: data.state
       },
       shop: {
         shop_name: data.shop_name,
         shop_address: data.shop_address,
-        shop_phone: data.shop_phone,
+        shop_phones: data.shop_phones,
       }
     }
   })

@@ -1,6 +1,6 @@
 import react, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Field, reduxForm, reset, initialize, change } from 'redux-form';
+import { Field, FieldArray, reduxForm, reset, initialize, change, arrayPush } from 'redux-form';
 import { BeatLoader } from 'react-spinners';
 
 import EditPasswordForm from './EditPasswordForm';
@@ -18,13 +18,14 @@ class Settings extends Component {
     edit: false,
     changePassword: false,
     loading: false,
-    error: ''
+    error: '',
+    phonesNum: null
   }
 
   renderInput = ({ input, label, meta, parentClass, inputClass, type }) => {
     return (
       <div className={`${parentClass}`}>
-        <label className="form-label">{label}</label>
+        {label !== null && <label className="form-label mt-3">{label}</label>}
         <input {...input} className={`form-control border-0 rounded-0 border-bottom ${inputClass}`} type={type || 'text'}/>
         {this.renderError(meta)}
       </div>
@@ -35,14 +36,15 @@ class Settings extends Component {
 
   toggleEdit = () => {
     let formData = {
+      tax_label: this.props.tax_label,
       tax_rate: this.props.tax_rate,
       state: this.props.state,
       shop_name: this.props.shop.name,
-      shop_phone: this.props.shop.phone,
+      shop_phones: this.props.shop.phones,
       shop_address: this.props.shop.address
     }
 
-    this.setState({edit: true});
+    this.setState({edit: true, phonesNum: this.props.shop.phones.length});
     this.props.initialize('settingsForm', formData);
   }
 
@@ -81,7 +83,9 @@ class Settings extends Component {
 
   onSubmit = formValues => {
     this.setState({edit: false});
-    this.props.updateSettings(formValues);
+    let values = {...formValues};
+    values.shop_phones = values.shop_phones.filter(phone => phone);
+    this.props.updateSettings(values);
     this.props.reset('settingsForm');
   }
 
@@ -114,15 +118,39 @@ class Settings extends Component {
     return val;
   }
 
+  renderPhonesInput = ({fields, meta, section}) => {
+    return fields.map((phone, i) => (
+      <Field
+        key={i}
+        name={phone}
+        component={this.renderInput}
+        label={`Shop phone ${i + 1}`}
+        validate={this.validatePhone}
+        normalize={this.pretifyPhone}
+      />
+    ))
+  }
+
+  renderPhones = () => {
+    if (!this.props.shop?.phones) return;
+
+    return this.props.shop.phones.map((phone, i) => (<p className='py-1 ps-4 fw-bold' key={i}>{phone}</p>))
+  }
+
   renderEditForm = () => {
     return (
       <form onSubmit={this.props.handleSubmit(this.onSubmit)} className='row'>
         <div className='col-12 col-md-6'>
           <Field
+            name='tax_label'
+            component={this.renderInput}
+            label={null}
+          />
+          <Field
             name='tax_rate'
             component={this.renderInput}
             normalize={value => numberNormalizer(value)}
-            label='Tax rate'
+            label={null}
           />
           <Field
             name='state'
@@ -136,13 +164,8 @@ class Settings extends Component {
             component={this.renderInput}
             label='Shop name'
           />
-          <Field
-            name='shop_phone'
-            component={this.renderInput}
-            label='Shop phone'
-            validate={this.validatePhone}
-            normalize={this.pretifyPhone}
-          />
+          <FieldArray name='shop_phones' component={this.renderPhonesInput}/>
+          <button className='btn btn-link float-end' type="button" onClick={() => this.props.pushArray('settingsForm', 'shop_phones', '')}>Add phone number +</button>
           <Field
             name='shop_address'
             component={this.renderInput}
@@ -161,7 +184,7 @@ class Settings extends Component {
     return (
       <div className='row'>
         <div className='col-12 col-md-6'>
-          <p className='text-secondary'>Tax rate</p>
+          <p className='text-secondary'>{this.props.tax_label}</p>
           <p className='py-1 ps-4 fw-bold'>{this.props.tax_rate}</p>
           <p className='text-secondary'>State</p>
           <p className='py-1 ps-4 fw-bold'>{this.props.state}</p>
@@ -169,8 +192,8 @@ class Settings extends Component {
         <div className='col-12 col-md-6'>
           <p className='text-secondary'>Shop name</p>
           <p className='py-1 ps-4 fw-bold'>{this.props.shop.name}</p>
-          <p className='text-secondary'>Shop phone</p>
-          <p className='py-1 ps-4 fw-bold'>{this.props.shop.phone}</p>
+          <p className='text-secondary'>Shop phone(s)</p>
+          {this.renderPhones()}
           <p className='text-secondary'>Shop address</p>
           <p className='py-1 ps-4 fw-bold'>{this.props.shop.address}</p>
         </div>
@@ -195,12 +218,13 @@ class Settings extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
+    tax_label: state.settings.settings.tax_label,
     tax_rate: state.settings.settings.tax_rate,
     state: state.settings.settings.state,
     userRole: state.auth.role,
     shop: {
       name: state.settings.shop.shop_name,
-      phone: state.settings.shop.shop_phone,
+      phones: state.settings.shop.shop_phones,
       address: state.settings.shop.shop_address
     }
   }
@@ -209,13 +233,22 @@ const mapStateToProps = (state, ownProps) => {
 const validate = formValues => {
   const errors = {};
 
+  if (!formValues.tax_label) errors.tax_label = "Please enter label";
+
   if (!formValues.tax_rate) errors.tax_rate = "Please enter tax rate";
 
   if (!formValues.state) errors.state = "Please enter state";
 
   if (!formValues.shop_name) errors.shop_name = "Please enter shop name";
 
-  if (!formValues.shop_phone) errors.shop_phone = "Please enter shop phone";
+  let shopPhones = formValues.shop_phones;
+
+  if (shopPhones) {
+    shopPhones = shopPhones.filter(phone => phone);
+    if (shopPhones.length === 0) errors.shop_phones = "Please enter at least one shop phone"
+  }
+
+  if (!shopPhones) errors.shop_phones = "Please enter shop phone";
 
   if (!formValues.shop_address) errors.shop_address = "Please enter shop address";
 
@@ -230,6 +263,7 @@ export default reduxForm({
   {
     updateSettings,
     reset,
-    initialize
+    initialize,
+    pushArray: arrayPush
   }
 )(Settings));

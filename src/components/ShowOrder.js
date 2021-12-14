@@ -68,8 +68,8 @@ class ShowOrder extends Component {
 
     return (
       <>
-        {!this.state.edit && <Order data={order} actions={true} toggleEdit={this.toggleEdit} toggleDelete={this.toggleDelete} />}
-        {this.state.edit && <OrderForm data={order} toggle={this.toggleEdit} onFormSubmit={this.submitForm} />}
+        {!this.state.edit && <Order data={order} actions={true} toggleEdit={this.toggleEdit} toggleDelete={this.toggleDelete} taxLabel={this.props.taxLabel} />}
+        {this.state.edit && <OrderForm data={order} toggle={this.toggleEdit} onFormSubmit={this.submitForm} taxLabel={this.props.taxLabel} />}
         {this.state.delete && this.renderDeletePopup()}
       </>
     )
@@ -96,7 +96,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     orders: state.orders.orders,
     orderCount: state.orders.orderCount,
-    getCalled: state.orders.getCalled
+    getCalled: state.orders.getCalled,
+    taxLabel: state.settings.settings.tax_label
   };
 }
 

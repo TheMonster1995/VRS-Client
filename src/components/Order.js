@@ -6,7 +6,7 @@ import {
   numberNormalizer
 } from '../helper'
 
-const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
+const Order = ({ data, actions = false, toggleEdit, toggleDelete, share, taxLabel }) => {
   const [viewRaw, setViewRaw] = useState(false);
   const history = useHistory();
 
@@ -23,6 +23,14 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
   ))
 
   const generateLaboreRows = rows => rows.map((row, i) => (
+    <tr key={i}>
+      <th scope="row">{i + 1}</th>
+      <td>{row.name}</td>
+      <td>{numberNormalizer(row.price)}</td>
+    </tr>
+  ))
+
+  const generateMaterialRows = rows => rows.map((row, i) => (
     <tr key={i}>
       <th scope="row">{i + 1}</th>
       <td>{row.name}</td>
@@ -105,15 +113,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           <div className='card-text mt-3 fw-bold'>Car info</div>
           <div className='row'>
             <div className='col border-end'>
-              <div className='card-text mt-1'><span className='text-muted me-2'>Year:</span><span className='fst-italic'>{data.order.car_info.year}</span></div>
-            </div>
-            <div className='col'>
               <div className='card-text mt-1'><span className='text-muted me-2'>Make:</span><span className='fst-italic'>{data.order.car_info.make}</span></div>
-            </div>
-          </div>
-          <div className='row'>
-            <div className='col border-end'>
-              <div className='card-text mt-1'><span className='text-muted'>Vin: #</span><span className='fst-italic'>{data.order.car_info.vin}</span></div>
             </div>
             <div className='col'>
               <div className='card-text mt-1'><span className='text-muted me-2'>License:</span><span className='fst-italic'>{data.order.car_info.license}</span></div>
@@ -121,10 +121,18 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           </div>
           <div className='row'>
             <div className='col border-end'>
-              <div className='card-text mt-1'><span className='text-muted'>Odometer: #</span><span className='fst-italic'>{data.order.car_info.odometer}</span></div>
+              <div className='card-text mt-1'><span className='text-muted'>Model:</span><span className='fst-italic'>{data.order.car_info.model}</span></div>
             </div>
             <div className='col'>
-              <div className='card-text mt-1'><span className='text-muted'>Model:</span><span className='fst-italic'>{data.order.car_info.model}</span></div>
+              <div className='card-text mt-1'><span className='text-muted'>Vin: #</span><span className='fst-italic'>{data.order.car_info.vin}</span></div>
+            </div>
+          </div>
+          <div className='row'>
+            <div className='col border-end'>
+              <div className='card-text mt-1'><span className='text-muted me-2'>Year:</span><span className='fst-italic'>{data.order.car_info.year}</span></div>
+            </div>
+            <div className='col'>
+              <div className='card-text mt-1'><span className='text-muted'>Odometer: #</span><span className='fst-italic'>{data.order.car_info.odometer}</span></div>
             </div>
           </div>
         </div>
@@ -209,7 +217,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
               </tr>
               <tr>
                 <th scope="row">7</th>
-                <td>Tax</td>
+                <td>{taxLabel}</td>
                 <td>{numberNormalizer(data.order.tax)}</td>
               </tr>
               <tr>
@@ -260,7 +268,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           </table>
         </div>
         <div className='col'>
-          <div className='card-title fw-bold'>Total</div>
+          <div className='card-title fw-bold'>Material</div>
           <table className="table">
             <thead>
               <tr>
@@ -270,38 +278,9 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
               </tr>
             </thead>
             <tbody>
+              {generateMaterialRows(data.shopOrder.material)}
               <tr>
-                <th scope="row">1</th>
-                <td>Labore only</td>
-                <td>{numberNormalizer(data.shopOrder.labore_only)}</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Parts</td>
-                <td>{numberNormalizer(data.shopOrder.parts_fee)}</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Gas, oil & grease</td>
-                <td>{numberNormalizer(data.shopOrder.gas_oil_grease)}</td>
-              </tr>
-              <tr>
-                <th scope="row">4</th>
-                <td>Misc. mercendise</td>
-                <td>{numberNormalizer(data.shopOrder.misc_merch)}</td>
-              </tr>
-              <tr>
-                <th scope="row">5</th>
-                <td>Sublet repairs</td>
-                <td>{numberNormalizer(data.shopOrder.sublet_repairs)}</td>
-              </tr>
-              <tr>
-                <th scope="row">6</th>
-                <td>Storage fee</td>
-                <td>{numberNormalizer(data.shopOrder.storage_fee)}</td>
-              </tr>
-              <tr>
-                <th scope="row">7</th>
+                <th scope="row"></th>
                 <th>Total</th>
                 <th>{numberNormalizer(data.shopOrder.total_fee)}</th>
               </tr>
@@ -320,7 +299,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           <button type='button' className='btn btn-link' onClick={() => setViewRaw(!viewRaw)}>Switch to {viewRaw ? 'normal view' : 'raw view'}<span className="ms-2"><i className='bi bi-arrow-left-right'></i></span></button>
         </div>
       }
-      <div className={`card my-3 ${actions && 'no-hover'}`}>
+      <div className={`card my-3  ${actions && 'no-hover'}`}>
         {(!actions && !share) &&
           <Link to={`/order/${data.order_id}`} className='no-style-link'>
             {renderHeader()}
@@ -335,6 +314,7 @@ const Order = ({ data, actions = false, toggleEdit, toggleDelete, share }) => {
           <div className='card-text fw-bold d-inline-block mx-3'>Date: {new Date(data.order.submission_date).toLocaleDateString()}</div>
         </div>
       </div>
+      <hr />
     </>
   )
 }

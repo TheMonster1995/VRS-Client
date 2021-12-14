@@ -29,7 +29,7 @@ class OrderForm extends Component {
       if (counter.toString().length === 1) counter = `00${counter}`;
       if (counter.toString().length === 2) counter = `0${counter}`;
 
-      const orderNum = `${today.getFullYear()}${month}${day}${counter}`;
+      const orderNum = `${month}${day}${today.getFullYear()}${counter}`;
 
       return this.props.change('orderForm', 'order_num', orderNum)
     }
@@ -44,6 +44,7 @@ class OrderForm extends Component {
       total: this.props.data.order.total_fee,
       shop_total_labore: this.props.data.shopOrder.labore_only,
       shop_total_parts: this.props.data.shopOrder.parts_fee,
+      shop_total_material: this.props.data.shopOrder.material_fee,
       shop_total: this.props.data.shopOrder.total_fee
     };
     let customerKeys = Object.keys(this.props.data.order.customer_info);
@@ -128,7 +129,7 @@ class OrderForm extends Component {
     }
 
     return fields.map((part, i) => (
-      <tbody key={i}>
+      <>
         <tr key={i}>
           <th scope="row">{i + 1}</th>
           <td>
@@ -183,7 +184,7 @@ class OrderForm extends Component {
           </td>
         </tr>
         {this.renderError(meta)}
-      </tbody>
+      </>
     )
   )}
 
@@ -195,7 +196,7 @@ class OrderForm extends Component {
     }
 
     return fields.map((labore, i) => (
-      <tbody key={i}>
+      <>
         <tr key={i}>
           <th scope="row">{i + 1}</th>
           <td>
@@ -218,7 +219,40 @@ class OrderForm extends Component {
           </td>
         </tr>
         {this.renderError(meta)}
-      </tbody>
+      </>
+    ))
+  }
+
+  renderMaterialTable = ({fields, meta, section}) => {
+    if (section === 'customer' || section === 'material') {
+      if (fields.length < 2) fields.push();
+
+      if (fields.length > 1 && fields.get(fields.length - 1)) fields.push();
+    }
+
+    return fields.map((material, i) => (
+      <>
+        <tr key={i}>
+          <th scope="row">{i + 1}</th>
+          <td>
+            <Field
+              name={`${material}.name`}
+              component={this.renderInput}
+              label={'Description'}
+            />
+          </td>
+          <td>
+            <Field
+              name={`${material}.price`}
+              component={this.renderInput}
+              label={'Price'}
+              onBlur={this.materialCal.bind(this, section)}
+              normalize={value => numberNormalizer(value)}
+            />
+          </td>
+        </tr>
+        {this.renderError(meta)}
+      </>
     ))
   }
 
@@ -282,6 +316,25 @@ class OrderForm extends Component {
     )
   }
 
+  materialCal = (section, e) => {
+    if (section === 'customer') return;
+
+    let materialAll = this.props.materialShop;
+    let res = 0;
+
+    if (!materialAll || materialAll.length === 0) return res;
+
+    materialAll.forEach(item => {
+      if (!item) return;
+      res += parseFloat(item.price?.toString().replace(/,/g, '') || 0);
+    });
+
+    console.log('after');
+    console.log(res);
+
+    this.taxCal(section, res, 'material');
+  }
+
   laboreCal = (section, e) => {
     let laboreAll = section === 'customer' ? this.props.labore : this.props.laboreShop;
     let res = 0;
@@ -337,9 +390,11 @@ class OrderForm extends Component {
     let misc = parseFloat(final.misc?.toString().replace(/,/g, '') || 0);
     let sublet = parseFloat(final.sublet?.toString().replace(/,/g, '') || 0);
     let storage = parseFloat(final.storage?.toString().replace(/,/g, '') || 0);
+    let material = 0;
 
     if (field && field === 'parts') parts = val;
     if (field && field === 'labore') labore = val;
+    if (field && field === 'material') material = val;
 
     let tax = 0;
 
@@ -348,9 +403,15 @@ class OrderForm extends Component {
       tax = Math.round(tax * 100) / 100;
     }
 
-    let total = parts + labore + gog + misc + sublet + storage + tax;
+    let total;
+
+    if (section === 'customer') total = parts + labore + gog + misc + sublet + storage + tax;
+    if (section === 'shop' || section === 'material') total = parts + labore + material;
 
     let fieldName = section === 'customer' ? 'total' : 'shop_total';
+    console.log('here');
+    console.log(total);
+    console.log(fieldName);
 
     if (section === 'customer') this.props.change('orderForm', `total_tax`, numberNormalizer(tax));
     this.props.change('orderForm', fieldName, numberNormalizer(total));
@@ -367,9 +428,7 @@ class OrderForm extends Component {
       let res = false;
       if (part) {
         res = true;
-        partKeys.forEach(item => {
-          if (!part[item] || part[item].toString().trim() === '') res = false;
-        });
+        if (!part['price'] || part['price'].toString().trim() === '') res = false;
       }
 
       if (res) return part;
@@ -378,22 +437,50 @@ class OrderForm extends Component {
       let res = false;
       if (
         lbr &&
-        lbr.name &&
-        lbr.name.toString().trim() !== ''
+        lbr.price &&
+        lbr.price.toString().trim() !== ''
       ) res = true;
 
       if (res) return lbr;
     });
 
     if (this.state.stage === 'first') {
-      if (this.props.data) return this.setState({stage: 'second'});
-
       let shopParts = parts.map(part => ({...part, price: '', price_total: ''}));
       let shopLabore = labore.map(lbr => ({...lbr, price: ''}));
+
+      if (this.props.data) {
+        shopParts = shopParts.map(part => {
+          let dataPart = this.props.data.shopOrder.parts.find(p => p.name === part.name);
+
+          if (!dataPart) return part;
+
+          return dataPart;
+        })
+
+        shopLabore = shopLabore.map(part => {
+          let dataLabore = this.props.data.shopOrder.labore.find(p => p.name === part.name);
+
+          if (!dataLabore) return part;
+
+          return dataLabore;
+        })
+      }
+
       this.props.change('orderForm', 'shop_parts', shopParts);
       this.props.change('orderForm', 'shop_labore', shopLabore);
       return this.setState({stage: 'second'});
     }
+
+    let material = formValues.shop_material.filter(mtr => {
+      let res = false;
+      if (
+        mtr &&
+        mtr.price &&
+        mtr.price.toString().trim() !== ''
+      ) res = true;
+
+      if (res) return mtr;
+    });
 
     let data = formValues;
 
@@ -401,6 +488,7 @@ class OrderForm extends Component {
     data.labore = labore;
     data.shop_parts = data.shop_parts.filter(part => part);
     data.shop_labore = data.shop_labore.filter(lbr => lbr);
+    data.shop_material = material;
     // data.state = 'california';
     data.state = this.props.state;
     data.submission_date = this.props.data ? this.props.data.order.submission_date : new Date();
@@ -727,7 +815,7 @@ class OrderForm extends Component {
               </tr>
               <tr>
                 <th scope="row">7</th>
-                <td>Tax</td>
+                <td>{this.props.taxLabel}</td>
                 <td>
                   <Field
                     name="total_tax"
@@ -786,11 +874,13 @@ class OrderForm extends Component {
                 <th scope="col">Price $</th>
               </tr>
             </thead>
-            <FieldArray name='shop_labore' component={this.renderLaboreTable} section="shop" />
+            <tbody>
+              <FieldArray name='shop_labore' component={this.renderLaboreTable} section="shop" />
+            </tbody>
           </table>
         </div>
         <div className='col'>
-          <div className='card-title fw-bold'>Total</div>
+          <div className='card-title fw-bold'>Material</div>
           <table className="table">
             <thead>
               <tr>
@@ -800,84 +890,9 @@ class OrderForm extends Component {
               </tr>
             </thead>
             <tbody>
+              <FieldArray name='shop_material' component={this.renderMaterialTable} section="material" />
               <tr>
-                <th scope="row">1</th>
-                <td>Labore only</td>
-                <td>
-                  <Field
-                    name="shop_total_labore"
-                    component={this.renderInput}
-                    inputClass='form-control-plaintext border-bottom-0 bg-transparent'
-                    onChange={(e) => e.preventDefault()}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Parts</td>
-                <td>
-                  <Field
-                    name="shop_total_parts"
-                    component={this.renderInput}
-                    inputClass='form-control-plaintext border-bottom-0 bg-transparent'
-                    onChange={(e) => e.preventDefault()}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td>Gas, oil & grease</td>
-                <td>
-                  <Field
-                    name="shop_gas_oil_grease"
-                    component={this.renderInput}
-                    label="0"
-                    onBlur={this.taxCal.bind(this, 'shop')}
-                    normalize={value => numberNormalizer(value)}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">4</th>
-                <td>Misc. mercendise</td>
-                <td>
-                  <Field
-                    name="shop_misc_merch"
-                    component={this.renderInput}
-                    label="0"
-                    onBlur={this.taxCal.bind(this, 'shop')}
-                    normalize={value => numberNormalizer(value)}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">5</th>
-                <td>Sublet repairs</td>
-                <td>
-                  <Field
-                    name="shop_sublet_repairs"
-                    component={this.renderInput}
-                    label="0"
-                    onBlur={this.taxCal.bind(this, 'shop')}
-                    normalize={value => numberNormalizer(value)}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">6</th>
-                <td>Storage fee</td>
-                <td>
-                  <Field
-                    name="shop_storage_fee"
-                    component={this.renderInput}
-                    label="0"
-                    onBlur={this.taxCal.bind(this, 'shop')}
-                    normalize={value => numberNormalizer(value)}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">8</th>
+                <th scope="col"></th>
                 <th>Total</th>
                 <td>
                   <Field
@@ -929,42 +944,45 @@ class OrderForm extends Component {
 
   render () {
     return (
-      <form onSubmit={this.props.handleSubmit(this.onSubmit)} autoComplete="off" className='order-form position-relative'>
-        <div className={`new-order-title-box border rounded fw-bold ${this.props.data && 'd-none'}`}>New order</div>
-        <div className='border rounded my-3'>
-          <div className='card-header'>
-            <div className='row'>
-              <div className='col px-sm-3 px-0'>
-                {this.state.stage === 'second' && <button className='btn text-warning fs-4 p-0 mx-3' type='button' onClick={this.toggleStage}><i className='bi bi-arrow-left-circle'></i></button>}
-                #<Field
-                  name="order_num"
-                  component={this.renderInput}
-                  inputClass='form-control-plaintext border-bottom-0 bg-transparent'
-                  onChange={(e) => e.preventDefault()}
-                />
+      <>
+        <form onSubmit={this.props.handleSubmit(this.onSubmit)} autoComplete="off" className='order-form position-relative'>
+          <div className={`new-order-title-box border rounded fw-bold ${this.props.data && 'd-none'}`}>New order</div>
+          <div className='border rounded my-3'>
+            <div className='card-header'>
+              <div className='row'>
+                <div className='col px-sm-3 px-0'>
+                  {this.state.stage === 'second' && <button className='btn text-warning fs-4 p-0 mx-3' type='button' onClick={this.toggleStage}><i className='bi bi-arrow-left-circle'></i></button>}
+                  #<Field
+                    name="order_num"
+                    component={this.renderInput}
+                    inputClass='form-control-plaintext border-bottom-0 bg-transparent'
+                    onChange={(e) => e.preventDefault()}
+                  />
+                </div>
+                <div className='col px-sm-3 px-0 text-end'>
+                  {this.renderTitleButtons()}
+                </div>
               </div>
-              <div className='col px-sm-3 px-0 text-end'>
-                {this.renderTitleButtons()}
+            </div>
+            <div className='card-body'>
+              {this.state.stage === 'first' && this.renderFirstStage()}
+              {this.state.stage === 'second' && this.renderSecondStage()}
+              <hr className='my-4' />
+              <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.order.authorized_by : this.props.name}</div>
+              <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.order.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+            </div>
+            <div className='card-footer row mx-0'>
+              <div className='col text-start'>
+                {this.state.stage === 'second' && <button className='btn btn-warning mx-2' type='button' onClick={this.toggleStage}>Back</button>}
+              </div>
+              <div className='col text-end'>
+                {this.renderActionButtons()}
               </div>
             </div>
           </div>
-          <div className='card-body'>
-            {this.state.stage === 'first' && this.renderFirstStage()}
-            {this.state.stage === 'second' && this.renderSecondStage()}
-            <hr className='my-4' />
-            <div className='card-text fw-bold d-inline-block mx-3'>Authorized by: {this.props.data ? this.props.data.order.authorized_by : this.props.name}</div>
-            <div className='card-text fw-bold d-inline-block mx-3'>Date: {this.props.data ? new Date(this.props.data.order.submission_date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
-          </div>
-          <div className='card-footer row mx-0'>
-            <div className='col text-start'>
-              {this.state.stage === 'second' && <button className='btn btn-warning mx-2' type='button' onClick={this.toggleStage}>Back</button>}
-            </div>
-            <div className='col text-end'>
-              {this.renderActionButtons()}
-            </div>
-          </div>
-        </div>
-      </form>
+        </form>
+        <hr />
+      </>
     )
   }
 }
@@ -1013,6 +1031,7 @@ const mapStateToProps = (state, ownProps) => {
     },
     laboreShop: selector(state, 'shop_labore') || [],
     partsShop: selector(state, 'shop_parts') || [],
+    materialShop: selector(state, 'shop_material') || [],
     finalShop: {
       parts: selector(state, 'shop_total_parts') || 0,
       labore: selector(state, 'shop_total_labore') || 0,
@@ -1028,48 +1047,16 @@ const mapStateToProps = (state, ownProps) => {
     orders: state.orders.orders,
     tax_rate: state.settings.settings.tax_rate,
     state: state.settings.settings.state,
-    name: state.auth.name
+    name: state.auth.name,
+    taxLabel: state.settings.settings.tax_label
   };
 }
 
 const mapDispatchToProps = dispatch => {
   return bindActionCreators({change, reset, initialize}, dispatch);
 }
-// SelectingFormValuesForm = connect(state => {
-//   // can select values individually
-//   const hasEmailValue = selector(state, 'hasEmail')
-//   const favoriteColorValue = selector(state, 'favoriteColor')
-//   // or together as a group
-//   const { firstName, lastName } = selector(state, 'firstName', 'lastName')
-//   return {
-//     hasEmailValue,
-//     favoriteColorValue,
-//     fullName: `${firstName || ''} ${lastName || ''}`
-//   }
-// })(SelectingFormValuesForm)
 
 export default reduxForm({
   form: 'orderForm',
   validate
 })(connect(mapStateToProps, mapDispatchToProps)(OrderForm))
-
-
-
-//
-
-
-// generateTermStatements = () => {
-//   let results = [];
-//
-//   if (data.cost_profit_representation) results.push(`This charge represent costs and profits to the motor Vehicle repaire facility for miscellaneous shop suplies or waste disposal.`)
-//
-//   if (data.law_charge) results.push(`This amount includes a charge of $${data.law_charge_fee} which is required under ${data.state.charAt(0).toUpperCase() + data.state.slice(1)} law.`)
-//
-//   if (data.written_estimate_choice === 'none') results.push(`No written estimate requested`)
-//
-//   if (data.written_estimate_choice === 'full') results.push(`Full written estimate requested`)
-//
-//   if (data.written_estimate_choice.split(',')[0] === 'limited') results.push(`Written estimate not required within a limit of $${data.written_estimate_choice.split(',')[1]}`)
-//
-//   return results.map(term => <div className='card-text mt-3' key={data.id + '123'}><i className='bi bi-check2 me-2'></i>{term}</div>)
-// }

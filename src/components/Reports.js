@@ -191,12 +191,16 @@ class Reports extends Component {
       sale = 0,
       costs = 0,
       netWorth = 0,
-      partsNum = 0;
+      partsNum = 0,
+      markup = 0,
+      tax = 0;
 
     orders.forEach(order => {
       sale = sale + parseFloat(order.order.total_fee);
       costs = costs + parseFloat(order.shopOrder.total_fee);
       netWorth = netWorth + (parseFloat(order.order.total_fee) - parseFloat(order.shopOrder.total_fee));
+      markup = markup + (parseFloat(order.order.parts_fee) - parseFloat(order.shopOrder.parts_fee));
+      tax = tax + parseFloat(order.order.tax);
 
       let orderParts = 0;
 
@@ -216,7 +220,9 @@ class Reports extends Component {
       sale: numberNormalizer(sale),
       costs: numberNormalizer(costs),
       netWorth: numberNormalizer(netWorth, -Infinity),
-      partsNum: numberNormalizer(partsNum)
+      partsNum: numberNormalizer(partsNum),
+      markUp: numberNormalizer(markup, -Infinity),
+      tax: numberNormalizer(tax)
     }
   }
 
@@ -249,6 +255,16 @@ class Reports extends Component {
     items.push({
       title: 'Total number of parts sold',
       total: reportsInfo.partsNum
+    })
+
+    items.push({
+      title: 'Markup',
+      total: reportsInfo.markUp
+    })
+
+    items.push({
+      title: `Total ${this.props.taxLabel}`,
+      total: reportsInfo.tax
     })
 
     return items;
@@ -548,7 +564,8 @@ const mapStateToProps = (state, ownProps) => {
     orders: state.orders.orders,
     costs: state.costs.costs,
     ordersCalled: state.orders.getCalled,
-    costsCalled: state.costs.getCalled
+    costsCalled: state.costs.getCalled,
+    taxLabel: state.settings.settings.tax_label.toLowerCase()
   }
 }
 

@@ -206,6 +206,13 @@ td {
   cursor: auto !important;
 }
 
+hr {
+  border: 0;
+  height: 1px !important;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  margin: 1.4rem 0;
+}
+
 @media (max-width: 576px) {
   .fs-xs-4 {
     font-size: calc(1.275rem + .3vw)!important;
